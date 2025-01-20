@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { addToActive, removeFromActive, clearActive } from "../store/store";
+import List from "../components/List"; // Import the reusable List component
 import "../styles/Active.css";
 
 const Active: React.FC = () => {
@@ -57,31 +58,23 @@ const Active: React.FC = () => {
           </div>
         )}
 
+        {/* added list component for code abstraction */}
         <div className="mb-4">
-        <ul className="custom-list">
-            {activeList.map((item, index) => (
-            <li key={index} className="custom-list-item">
-                <span>{item}</span>
-                <button
-                className="btn btn-sm btn-danger"
-                onClick={() => handleRemove(item)}
-                >
-                X
-                </button>
-            </li>
-            ))}
-        </ul>
+          <List items={activeList} onRemove={handleRemove} />
         </div>
 
         <div className="button-container">
-          <button className="btn btn-warning btn-lg me-2" onClick={handleClearActive}>
+          <button
+            className="btn btn-warning btn-lg me-2"
+            onClick={handleClearActive}
+          >
             Clear
           </button>
           <div>
-          <button className="btn btn-primary btn-lg" onClick={togglePopup}>
-            Add Product
-          </button>
-        </div>
+            <button className="btn btn-primary btn-lg" onClick={togglePopup}>
+              Add Product
+            </button>
+          </div>
         </div>
       </div>
     </div>

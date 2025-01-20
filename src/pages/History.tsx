@@ -2,7 +2,8 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { clearHistory } from "../store/store";
-import "../styles/History.css"; // Import the new History.css file
+import List from "../components/List"; // Import the reusable List component
+import "../styles/History.css";
 
 const History: React.FC = () => {
   const historyList = useSelector((state: RootState) => state.history);
@@ -15,14 +16,9 @@ const History: React.FC = () => {
   return (
     <div className="container-fluid history-page-container">
       <div className="container mt-4">
+        
         <div className="mb-4">
-          <ul className="custom-list">
-            {historyList.map((item, index) => (
-              <li key={index} className="custom-list-item">
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          <List items={historyList} />
         </div>
 
         <div className="button-container">
