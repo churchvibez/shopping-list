@@ -126,7 +126,7 @@ const Active: React.FC = () => {
         </div>
         
         <div className="last-ten">
-          <h3 className="last-ten-header">Последние 10 добавленных товаров</h3>
+          <h3 className="last-ten-header">Последние продукты</h3>
           {lastAdded.length > 0 ? (
             <ul className="custom-list">
               {/* // create unique set of the last 10 items */}
