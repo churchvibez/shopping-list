@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { addToActive, removeFromActive, clearActive } from "../store/store";
-import List from "../components/List"; // Import the reusable List component
+import List from "../components/List";
 import "../styles/Active.css";
 
 const Active: React.FC = () => {
   const activeList = useSelector((state: RootState) => state.active);
+  const lastAdded = useSelector((state: RootState) => state.lastAdded);
   const dispatch = useDispatch<AppDispatch>();
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -38,44 +39,78 @@ const Active: React.FC = () => {
         {isPopupOpen && (
           <div className="popup-overlay">
             <div className="popup">
-              <h2>Add a Product</h2>
+              <h2>Добавить продукт</h2>
               <input
                 type="text"
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
-                placeholder="Product Name"
+                placeholder="Например: хлеб..."
                 className="popup-input"
               />
               <div className="d-flex justify-content-between">
                 <button className="btn btn-success" onClick={handleAdd}>
-                  Add
+                  Добавить
                 </button>
                 <button className="btn btn-danger" onClick={togglePopup}>
-                  Cancel
+                  Отменить
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* added list component for code abstraction */}
-        <div className="mb-4">
-          <List items={activeList} onRemove={handleRemove} />
+        {/* either display list of items, or message saying empty */}
+        <div>
+          {activeList.length > 0 ? (
+            <List items={activeList} onRemove={handleRemove} />
+          ) : (
+            <p className="empty-text">Список покупок пуст!</p>
+          )}
         </div>
 
-        <div className="button-container">
-          <button
-            className="btn btn-warning btn-lg me-2"
-            onClick={handleClearActive}
-          >
-            Clear
-          </button>
-          <div>
-            <button className="btn btn-primary btn-lg" onClick={togglePopup}>
-              Add Product
+        {/* // display clear + add button if items exist, otherwise just an add button */}
+        <div className="button-row">
+          {activeList.length > 0 && (
+            <button
+              className="btn btn-warning btn-lg clear-button"
+              onClick={handleClearActive}
+            >
+              Очистить
             </button>
-          </div>
+          )}
+          <button
+            className={`btn btn-primary btn-lg ${
+              activeList.length > 0 ? "add-button" : "add-button-centered"
+            }`}
+            onClick={togglePopup}
+          >
+            +
+          </button>
         </div>
+        
+        <div className="last-ten">
+          <h3 className="last-ten-header">Последние 10 добавленных товаров</h3>
+          {lastAdded.length > 0 ? (
+            <ul className="custom-list">
+              {/* // create unique set of the last 10 items */}
+              {[...new Set(lastAdded)].map((item) => (
+                <li className="custom-list-item">
+                  {item}
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={() => dispatch(addToActive(item))}
+                    disabled={activeList.includes(item)}
+                  >
+                    +
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>Нет добавленных товаров</p>
+          )}
+        </div>
+
       </div>
     </div>
   );

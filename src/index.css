@@ -1,15 +1,23 @@
-/* font for our web page */
+/* font for our web page*/
 @font-face {
-  font-family: "poppins";
-  src: url("/fonts/Poppins-Light.ttf") format("truetype");
+  font-family: "roboto";
+  src: url("/fonts/Roboto_Condensed-Regular.ttf") format("truetype");
   font-style: normal;
 }
 
+html, body {
+  background-color: rgb(221, 230, 220);
+  margin: 0;
+    padding: 0;
+    min-height: 100%; 
+}
+
 .app-container {
-  background-color: #f8f9fa;
+  background-color: rgb(221, 230, 220);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-bottom: 30px;
 }
 
 .common-header {
@@ -21,6 +29,9 @@
   top: 0;
   z-index: 1000;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 130px;
+  width: 100%;
+  position: static;
 }
 
 .nav-links {
@@ -30,13 +41,14 @@
   margin: 10px 0 0;
   padding: 0;
   gap: 15px;
+  font-size: 20px;
 }
 
 .nav-link {
   text-decoration: none;
   font-size: 1.6rem;
   transition: color 0.3s;
-  font-family: poppins
+  font-family: roboto;
 }
 
 .nav-link:hover {
@@ -49,7 +61,7 @@
 }
 
 .nav-header {
-  font-family: poppins
+  font-family: roboto;
 }
 
 @media (max-width: 768px) {

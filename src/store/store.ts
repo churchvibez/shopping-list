@@ -5,12 +5,14 @@ import { saveToDB, getToDB } from "../db";
 interface ShoppingListState {
     active: string[];
     history: string[];
+    lastAdded: string[];
 }
 
 // and then define initial states
 const initialState: ShoppingListState = {
     active: [],
     history: [],
+    lastAdded: [],
 }
 
 // create our redux slice
@@ -34,14 +36,28 @@ const ShoppingListSlice = createSlice({
             if (!state.history.includes(product)) {
                 state.history.push(product);
             }
+
+            // update the array to only track the last 10 products
+            state.lastAdded = state.lastAdded.filter((item) => item !== product);
+
+            if (state.lastAdded.length < 10) {
+                state.lastAdded = [product, ...state.lastAdded];
+            } else {
+                state.lastAdded = [product, ...state.lastAdded.slice(0, 9)];
+            }
+                
         },
 
         removeFromActive(state, action: PayloadAction<string>) {
             state.active = state.active.filter((product) => product !== action.payload);
         },
 
+        // initialise any missing properties
         loadFromDB(_state, action: PayloadAction<ShoppingListState>) {
-            return action.payload;
+            return {
+                ...initialState,
+                ...action.payload
+            }
         },
 
         // reducers to clear the lists
@@ -65,7 +81,8 @@ const store = configureStore({
 
 // save to indexedDB on state change
 store.subscribe(() => {
-    const state = store.getState()
+    const state = store.getState();
+    console.log("Redux State:", state);
     saveToDB("shoppingList", state);
 });
 
@@ -80,53 +97,4 @@ store.subscribe(() => {
 export default store;
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

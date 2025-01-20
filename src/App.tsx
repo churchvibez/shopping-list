@@ -10,7 +10,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <header className="common-header">
-        <h1 className="nav-header">Shopping List</h1>
+        <h1 className="nav-header">Список Покупок</h1>
         <nav>
           <ul className="nav-links">
             <li>
@@ -20,7 +20,7 @@ const App: React.FC = () => {
                   location.pathname === "/active" ? "active-link" : ""
                 }`}
               >
-                Active
+                Покупки
               </Link>
             </li>
             <li>
@@ -30,7 +30,7 @@ const App: React.FC = () => {
                   location.pathname === "/history" ? "active-link" : ""
                 }`}
               >
-                History
+                Все продукты
               </Link>
             </li>
           </ul>

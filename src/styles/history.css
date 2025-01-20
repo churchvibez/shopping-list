@@ -1,9 +1,4 @@
-.history-page-container {
-    background-color: rgb(221, 230, 220);
-    min-height: 100vh;
-  }
-  
-/* square bullets in our list */
+
 .custom-list {
   list-style-type: square;
   padding-left: 20%;
@@ -12,12 +7,11 @@
 .custom-list-item {
   margin-bottom: 20px;
   padding-left: 1%;
-  font-family: poppins;
+  font-family: roboto;
   font-size: 1.2rem;
   position: relative;
 }
 
-/* add our line under each element in the list*/
 .custom-list-item::after {
   content: "";
   position: absolute;
@@ -33,7 +27,7 @@
   justify-content: center;
   gap: 15px;
   margin-top: 20px;
-  font-family: poppins;
+  font-family: roboto;
 }
 
 .btn {
@@ -45,4 +39,10 @@
   transform: translateY(-1px);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
+
+.clear-button-history
+{
+  margin-top: 3%;
+}
+
   
