@@ -42,6 +42,8 @@ const App: React.FC = () => {
         <Route path="/" element={<Navigate to="/active" replace />} />
         <Route path="/active" element={<Active />} />
         <Route path="/history" element={<History />} />
+        <Route path="*" element={<Navigate to="/active" replace />} />
+
       </Routes>
     </div>
   );

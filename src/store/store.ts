@@ -40,7 +40,7 @@ const ShoppingListSlice = createSlice({
             state.active = state.active.filter((product) => product !== action.payload);
         },
 
-        loadFromDB(state, action: PayloadAction<ShoppingListState>) {
+        loadFromDB(_state, action: PayloadAction<ShoppingListState>) {
             return action.payload;
         },
 
