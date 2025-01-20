@@ -7,11 +7,13 @@ import "../styles/Active.css";
 
 const Active: React.FC = () => {
   const activeList = useSelector((state: RootState) => state.active);
+  const historyList = useSelector((state: RootState) => state.history);
   const lastAdded = useSelector((state: RootState) => state.lastAdded);
   const dispatch = useDispatch<AppDispatch>();
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [product, setProduct] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const handleAdd = () => {
     if (product.trim()) {
@@ -31,7 +33,23 @@ const Active: React.FC = () => {
 
   const togglePopup = () => {
     setIsPopupOpen((prev) => !prev);
+    setSuggestions([]);
   };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    setProduct(input);
+
+    if (input.trim() === "") {
+      setSuggestions([]);
+      return;
+    }
+
+    const filteredSuggestions = historyList.filter((item) => 
+      item.toLowerCase().includes(input.toLowerCase())
+    );
+    setSuggestions(filteredSuggestions);
+  }
 
   return (
     <div className="container-fluid page-container">
@@ -43,10 +61,26 @@ const Active: React.FC = () => {
               <input
                 type="text"
                 value={product}
-                onChange={(e) => setProduct(e.target.value)}
+                onChange={handleInputChange}
                 placeholder="Например: хлеб..."
                 className="popup-input"
               />
+              {suggestions.length > 0 && (
+                <ul className="autocomplete-list">
+                  {suggestions.map((suggestion, index) =>
+                    <li
+                      key={index}
+                      className="autocomplete-item"
+                      onClick={() => {
+                        setProduct(suggestion);
+                        setSuggestions([]);
+                      }}
+                    >
+                      {suggestion}
+                    </li>
+                  )}
+                </ul>
+              )}
               <div className="d-flex justify-content-between">
                 <button className="btn btn-success" onClick={handleAdd}>
                   Добавить
