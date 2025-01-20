@@ -1,0 +1,60 @@
+/* font for our web page */
+@font-face {
+  font-family: "poppins";
+  src: url("/fonts/Poppins-Light.ttf") format("truetype");
+  font-style: normal;
+}
+
+.app-container {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.common-header {
+  background-color: rgb(148, 181, 145);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 0;
+  padding: 0;
+  gap: 15px;
+}
+
+.nav-link {
+  text-decoration: none;
+  font-size: 1.6rem;
+  transition: color 0.3s;
+  font-family: poppins
+}
+
+.nav-link:hover {
+  color: #007bff;
+}
+
+.nav-link.active-link {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.nav-header {
+  font-family: poppins
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

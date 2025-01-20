@@ -1,0 +1,96 @@
+.page-container {
+  background-color: rgb(221, 230, 220);
+  min-height: 100vh;
+}
+
+.header-image {
+  width: 90%;
+  object-fit: cover;
+  position: absolute; 
+  top: 0;
+  left: 0;
+}
+
+/* our popup modal when the user wants to enter a product*/
+.popup {
+background-color: rgb(208, 240, 192);
+padding: 20px;
+border-radius: 10px;
+box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+width: 300px;
+font-family: poppins;
+position: relative;
+z-index: 2;
+}
+
+.popup-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100vw;
+height: 100vh;
+background-color: rgba(0, 0, 0, 0.5);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 1;
+}
+
+.popup-input {
+width: 100%;
+padding: 10px;
+margin-bottom: 10px;
+border: 1px solid #ccc;
+border-radius: 5px;
+font-family: poppins;
+}
+
+.popup button {
+font-family: poppins; 
+}
+
+/* prevent list lines from overlapping */
+.custom-list-item::after {
+z-index: 0;
+}
+
+.custom-list {
+  list-style-type: square;
+  padding-left: 20%;
+}
+
+.custom-list-item {
+  margin-bottom: 20px;
+  padding-left: 1%;
+  font-family: poppins;
+  font-size: 1.2rem;
+  position: relative;
+}
+
+.custom-list-item::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 80%;
+  height: 1px;
+  background-color: #afbdca;
+}
+
+.custom-list-item button {
+  display: none;
+  position: absolute;
+  left: 75%;
+}
+
+/* shows button whenever we hover over element in the list  */
+.custom-list-item:hover button {
+  display: inline-block;
+}
+
+.custom-list-item button:hover {
+  background-color: #dc3545; 
+  color: white;
+}
+
+
