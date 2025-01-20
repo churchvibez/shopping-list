@@ -36,15 +36,18 @@ const Active: React.FC = () => {
     setSuggestions([]);
   };
 
+  // functionality for autocompletion
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     setProduct(input);
 
+    // handle empty input
     if (input.trim() === "") {
       setSuggestions([]);
       return;
     }
 
+    // retrieve suggestions from list of previous items added
     const filteredSuggestions = historyList.filter((item) => 
       item.toLowerCase().includes(input.toLowerCase())
     );
