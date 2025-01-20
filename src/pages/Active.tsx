@@ -107,7 +107,7 @@ const Active: React.FC = () => {
               ))}
             </ul>
           ) : (
-            <p>Нет добавленных товаров</p>
+            <p className="empty-text">Нет добавленных товаров!</p>
           )}
         </div>
 
