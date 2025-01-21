@@ -13,7 +13,7 @@ interface CustomListProps {
   onDelete?: (item: string) => void;
   onAdd?: (item: string) => void;
   isAddable?: boolean;
-  disabledItems?: string[]; // Array of items to disable
+  disabledItems?: string[];
 }
 
 const CustomList: React.FC<CustomListProps> = ({
@@ -36,7 +36,7 @@ const CustomList: React.FC<CustomListProps> = ({
                   edge="end"
                   color="primary"
                   onClick={() => onAdd(item)}
-                  disabled={disabledItems.includes(item)} // Disable based on the condition
+                  disabled={disabledItems.includes(item)}
                 >
                   <AddIcon />
                 </IconButton>
