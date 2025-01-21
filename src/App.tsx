@@ -2,49 +2,47 @@ import React from "react";
 import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import Active from "./pages/Active";
 import History from "./pages/History";
-import "./index.css";
+import { AppBar, Toolbar, Typography, Tabs, Tab, Box } from "@mui/material";
 
 const App: React.FC = () => {
   const location = useLocation();
+  const currentTab = location.pathname;
 
   return (
-    <div className="app-container">
-      <header className="common-header">
-        <h1 className="nav-header">Список Покупок</h1>
-        <nav>
-          <ul className="nav-links">
-            <li>
-              <Link
-                to="/active"
-                className={`nav-link ${
-                  location.pathname === "/active" ? "active-link" : ""
-                }`}
-              >
-                Покупки
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/history"
-                className={`nav-link ${
-                  location.pathname === "/history" ? "active-link" : ""
-                }`}
-              >
-                Все продукты
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </header>
+    <Box className="app-container" sx={{ minHeight: "100vh", backgroundColor: "rgb(221, 230, 220)" }}>
+      <AppBar position="sticky" sx={{ backgroundColor: "rgb(148, 181, 145)" }}>
+        <Toolbar>
+          <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: "bold" }}>
+            Список Покупок
+          </Typography>
+          <Tabs value={currentTab} textColor="inherit" indicatorColor="primary">
+            <Tab
+              label="Покупки"
+              value="/active"
+              component={Link}
+              to="/active"
+              sx={{ fontWeight: "bold" }}
+            />
+            <Tab
+              label="Все продукты"
+              value="/history"
+              component={Link}
+              to="/history"
+              sx={{ fontWeight: "bold" }}
+            />
+          </Tabs>
+        </Toolbar>
+      </AppBar>
 
-      <Routes>
-        {/* routes will redirect to /active when the root URL is loaded */}
-        <Route path="/" element={<Navigate to="/active" replace />} />
-        <Route path="/active" element={<Active />} />
-        <Route path="/history" element={<History />} />
-        <Route path="*" element={<Navigate to="/active" replace />} />
-      </Routes>
-    </div>
+      <Box sx={{ padding: "2rem" }}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/active" replace />} />
+          <Route path="/active" element={<Active />} />
+          <Route path="/history" element={<History />} />
+          <Route path="*" element={<Navigate to="/active" replace />} />
+        </Routes>
+      </Box>
+    </Box>
   );
 };
 

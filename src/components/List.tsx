@@ -1,4 +1,8 @@
 import React from "react";
+import '../styles/main.scss';
+
+import Button from '@mui/material/Button';
+import CloseIcon from '@mui/icons-material/Close';
 
 // component used for code abstraction in active + history
 interface ListProps {
@@ -6,19 +10,21 @@ interface ListProps {
     onRemove?: (item: string) => void;
 }
 
-const List: React.FC<ListProps> = ({ items, onRemove }) => {
+const ComponentList: React.FC<ListProps> = ({ items, onRemove }) => {
     return(
         <ul className="custom-list">
             {items.map((item, index) => (
                 <li key={index} className="custom-list-item">
                     <span>{item}</span>
                     {onRemove && (
-                        <button
+                        <Button
+                            variant="contained"
+                            color="error"
                             className="btn btn-sm btn-danger"
                             onClick={() => onRemove(item)}
                         >
-                            X
-                        </button>
+                            <CloseIcon/>
+                        </Button>
                     )}
                 </li>
             ))}
@@ -26,4 +32,4 @@ const List: React.FC<ListProps> = ({ items, onRemove }) => {
     );
 };
 
-export default List;
+export default ComponentList;

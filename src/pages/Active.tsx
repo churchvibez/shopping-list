@@ -2,9 +2,25 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { addToActive, removeFromActive, clearActive } from "../store/store";
-import List from "../components/List";
+import CustomList from "../components/CustomList";
 import RubbishBinIcon from "../assets/rubbish-bin.svg";
-import "../styles/Active.css";
+import '../styles/main.scss';
+import Button from '@mui/material/Button';
+import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import TextField from '@mui/material/TextField';
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import IconButton from "@mui/material/IconButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Grid2';
 
 const Active: React.FC = () => {
   const activeList = useSelector((state: RootState) => state.active);
@@ -58,99 +74,199 @@ const Active: React.FC = () => {
   return (
     <div className="container-fluid page-container">
       <div className="container mt-4">
-        {isPopupOpen && (
-          <div className="popup-overlay">
-            <div className="popup">
-              <h2>Добавить продукт</h2>
-              <input
-                type="text"
-                value={product}
-                onChange={handleInputChange}
-                placeholder="Например: хлеб..."
-                className="popup-input"
-              />
-              {suggestions.length > 0 && (
-                <ul className="autocomplete-list">
-                  {suggestions.map((suggestion, index) =>
-                    <li
-                      key={index}
-                      className="autocomplete-item"
-                      onClick={() => {
-                        setProduct(suggestion);
-                        setSuggestions([]);
-                      }}
-                    >
-                      {suggestion}
-                    </li>
-                  )}
-                </ul>
-              )}
-              <div className="d-flex justify-content-between">
-                <button className="btn btn-success" onClick={handleAdd}>
-                  Добавить
-                </button>
-                <button className="btn btn-danger" onClick={togglePopup}>
-                  Отменить
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <Dialog open={isPopupOpen} onClose={togglePopup}>
+          <DialogTitle>
+            <Typography align="center" variant="h6" component="h2">
+              Добавить продукт
+            </Typography>
+          </DialogTitle>
+          <DialogContent
+            sx={{
+              overflowY: "visible",
+              position: "relative",
+            }}
+          >
+            <TextField
+              fullWidth
+              variant="outlined"
+              value={product}
+              onChange={handleInputChange}
+              label="Например: хлеб..."
+              placeholder="Введите продукт"
+              sx={{
+                marginTop: '15px',
+                marginBottom: '15px',
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#94b591', 
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#7ca577',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#5d8c4f',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#94b591',
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#5d8c4f',
+                },
+              }}
+            />
+            {suggestions.length > 0 && (
+              <ul className="autocomplete-list">
+              {suggestions.map((suggestion, index) => (
+                <li
+                  key={index}
+                  className="autocomplete-item"
+                  onClick={() => {
+                    setProduct(suggestion);
+                    setSuggestions([]);
+                  }}
+                >
+                  {suggestion}
+                </li>
+              ))}
+            </ul>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={handleAdd}
+              sx={{
+                color: "#94b591",
+                borderColor: "#94b591",
+                "&:hover": {
+                  borderColor: "#94b591",
+                  backgroundColor: "rgba(29, 98, 202, 0.1)",
+                },
+              }}
+            >
+              Добавить
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<CloseIcon />}
+              onClick={togglePopup}
+              sx={{
+                color: "rgb(255, 87, 87)",
+                borderColor: "rgb(255, 87, 87)",
+                "&:hover": {
+                  borderColor: "rgb(255, 87, 87)",
+                  backgroundColor: "rgba(255, 0, 0, 0.1)",
+                },
+              }}
+            >
+              Отменить
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* either display list of items, or message saying empty */}
         <div>
           {activeList.length > 0 ? (
-            <List items={activeList} onRemove={handleRemove} />
+            <div className="custom-list">
+              <CustomList 
+              items={activeList} 
+              onDelete={handleRemove} 
+            />
+            </div>
           ) : (
-            <p className="empty-text">Список покупок пуст!</p>
+              <Typography
+                variant="h4"
+                align="center"
+                color="textSecondary"
+              >
+                Список покупок пуст!
+              </Typography>
           )}
         </div>
 
-        {/* // display clear + add button if items exist, otherwise just an add button */}
-        <div className="button-row">
+        <Grid container spacing={2} justifyContent="center" alignItems="center" sx={{ marginTop: '20px' }}>
           {activeList.length > 0 && (
-            <button
-              className="btn btn-warning btn-lg clear-button"
-              onClick={handleClearActive}
+            <Grid>
+              <Button onClick={handleClearActive}>
+                <img src={RubbishBinIcon} alt="Очистить" style={{ width: '25px', height: '25px' }} />
+              </Button>
+            </Grid>
+          )}
+          <Grid>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={togglePopup}
+              sx={{
+                '&:hover': {
+                  backgroundColor: '#9fd47f',
+                },
+              }}
             >
-              <img src={RubbishBinIcon} alt="Очистить" style={{ width: "20px", height: "20px" }} />
-            </button>
-          )}
-          <button
-            className={`btn btn-primary btn-lg ${
-              activeList.length > 0 ? "add-button" : "add-button-centered"
-            }`}
-            onClick={togglePopup}
-          >
-            +
-          </button>
-        </div>
-        
-        <div className="last-ten">
-          <h3 className="last-ten-header">Последние продукты</h3>
-          {lastAdded.length > 0 ? (
-            <ul className="custom-list">
-              {/* // create unique set of the last 10 items */}
-              {[...new Set(lastAdded)].map((item) => (
-                <li className="custom-list-item">
-                  {item}
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={() => dispatch(addToActive(item))}
-                    disabled={activeList.includes(item)}
-                  >
-                    +
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="empty-text">Нет добавленных товаров!</p>
-          )}
-        </div>
+              <AddIcon />
+            </Button>
+          </Grid>
+        </Grid>
 
+      
+        <Grid 
+          container 
+          direction="column" 
+          alignItems="center"
+          sx={{ marginTop: '5%' }}
+        >
+          <Grid>
+            <Typography variant="h6" align="center">
+              Последние продукты
+            </Typography>
+          </Grid>
+          <Grid 
+            size={{ xs: 5, md: 6}}
+            sx= {{
+              marginLeft: '10%',
+            }}
+          >
+            {lastAdded.length > 0 ? (
+              <List className="custom-list">
+                {[...new Set(lastAdded)].map((item) => (
+                  <ListItem key={item} className="custom-list-item">
+                    <ListItemIcon>
+                      <FormatListBulletedOutlinedIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={item} />
+                    <IconButton
+                      edge="end"
+                      color="primary"
+                      onClick={() => dispatch(addToActive(item))}
+                      disabled={activeList.includes(item)} 
+                      sx={{
+                        opacity: activeList.includes(item) ? 0.5 : 1,
+                        pointerEvents: activeList.includes(item) ? 'none' : 'auto',
+                      }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography
+                align="center"
+                sx={{
+                  textAlign: 'center',
+                  marginLeft: '15%',
+                  transform: 'translateX(-20.5%)',
+                }}
+              >
+                Нет добавленных товаров!
+              </Typography>
+            )}
+          </Grid>
+        </Grid>
+        </div>
       </div>
-    </div>
   );
 };
 
