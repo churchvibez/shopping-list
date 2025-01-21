@@ -101,6 +101,12 @@ z-index: 0;
   position: absolute;
   margin-top: 3%;
   left: 45%;
+  
+}
+
+.clear-button:hover img {
+   background-color: transparent;
+  filter: brightness(0) saturate(100%) invert(17%) sepia(100%) saturate(7463%) hue-rotate(358deg) brightness(96%) contrast(122%);
 }
 
 .add-button {

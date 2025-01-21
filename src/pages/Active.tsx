@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { addToActive, removeFromActive, clearActive } from "../store/store";
 import List from "../components/List";
+import RubbishBinIcon from "../assets/rubbish-bin.svg";
 import "../styles/Active.css";
 
 const Active: React.FC = () => {
@@ -112,7 +113,7 @@ const Active: React.FC = () => {
               className="btn btn-warning btn-lg clear-button"
               onClick={handleClearActive}
             >
-              Очистить
+              <img src={RubbishBinIcon} alt="Очистить" style={{ width: "20px", height: "20px" }} />
             </button>
           )}
           <button
