@@ -113,25 +113,24 @@ body {
     font-family: roboto;
   }
 
-// lists on active + history
-.custom-list {
-    padding-left: 30%; 
-    width: 80%;
+  .custom-list {
+    padding-left: 30%;
+    padding-right: 30%;
+    width: 100%;
+    font-family: roboto;
   }
   
   .custom-list-item {
-    list-style-type: square;
-    font-family: roboto;
-    font-size: 1.2rem;
-    position: relative;
+    align-items: center; 
+    justify-content: space-between;
     margin-bottom: 1.3rem;
-    display: inline-block;
+    position: relative;
   }
   
   .custom-list-item::after {
     content: "";
     position: absolute;
-    bottom: -10px;
+    bottom: 0;
     left: 0;
     width: 100%;
     height: 1px;
@@ -140,9 +139,10 @@ body {
   }
   
   .custom-list-item button:hover {
-    background-color: #d1cfcf
+    background-color: #d1cfcf;
   }
-
+  
+  
 // last 10 prdocuts
 .last-ten {
     padding-left: 30%; 

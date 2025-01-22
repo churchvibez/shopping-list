@@ -1,14 +1,17 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { saveToDB, getToDB } from "../db";
 
-// create state interface first
+export interface Item {
+    name: string;
+    amount: string;
+    indices: string;
+}
 interface ShoppingListState {
-    active: string[];
-    history: string[];
-    lastAdded: string[];
+    active: Item[];
+    history: Item[];
+    lastAdded: Item[];
 }
 
-// and then define initial states
 const initialState: ShoppingListState = {
     active: [],
     history: [],
@@ -21,35 +24,35 @@ const ShoppingListSlice = createSlice({
     initialState,
     reducers: {
         
-        addToActive(state, action: PayloadAction<string>) {
-            const product = action.payload;
+        addToActive(state, action: PayloadAction<Item>) {
+            const { name, amount, indices } = action.payload;
 
             // if product exists in active, we skip adding it
-            if (state.active.includes(product)) {
-                console.warn(`product already there: ${product}`);
+            if (state.active.some((item) => item.name === name)) {
+                console.warn(`product already there: ${name}`);
                 return;
             }
         
-            state.active.push(product);
+            state.active.push({ name, amount, indices });
         
             // if product not in history, we add it
-            if (!state.history.includes(product)) {
-                state.history.push(product);
+            if (!state.history.some((item) => item.name === name)) {
+                state.history.push({ name, amount, indices });
             }
 
             // update the array to only track the last 10 products
-            state.lastAdded = state.lastAdded.filter((item) => item !== product);
+            state.lastAdded = state.lastAdded.filter((item) => item.name !== name);
 
             if (state.lastAdded.length < 10) {
-                state.lastAdded = [product, ...state.lastAdded];
+                state.lastAdded = [{ name, amount, indices }, ...state.lastAdded];
             } else {
-                state.lastAdded = [product, ...state.lastAdded.slice(0, 9)];
+                state.lastAdded = [{ name, amount, indices }, ...state.lastAdded.slice(0, 9)];
             }
                 
         },
 
         removeFromActive(state, action: PayloadAction<string>) {
-            state.active = state.active.filter((product) => product !== action.payload);
+            state.active = state.active.filter((item) => item.name !== action.payload);
         },
 
         // initialise any missing properties

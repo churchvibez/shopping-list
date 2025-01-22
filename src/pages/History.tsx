@@ -1,7 +1,4 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
-import { clearHistory } from "../store/store";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -11,6 +8,9 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
 import RubbishBinIcon from "../assets/rubbish-bin.svg";
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
+import { clearHistory } from "../store/store";
 
 const History: React.FC = () => {
   const historyList = useSelector((state: RootState) => state.history);
@@ -28,10 +28,7 @@ const History: React.FC = () => {
       sx={{ marginTop: "1.2%" }}
     >
       <Grid 
-        size={{ xs: 5, md: 4}}
-        sx= {{
-          marginLeft: '7%',
-        }}
+        size={{ xs: 5, md: 3}}
       >
         {historyList.length > 0 ? (
           <List className="custom-list">
@@ -40,7 +37,19 @@ const History: React.FC = () => {
                 <ListItemIcon>
                       <FormatListBulletedOutlinedIcon />
                   </ListItemIcon>
-                <ListItemText primary={item} />
+                <ListItemText primary={
+                   <Typography
+                    noWrap
+                    sx = {{
+                      maxWidth: '100%',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipses',
+                      whiteSpace: 'nowrap',
+                    }} 
+                  >
+                  {item.name} - {item.amount} {item.indices}
+                   </Typography>
+                }/>
               </ListItem>
             ))}
           </List>
@@ -50,7 +59,7 @@ const History: React.FC = () => {
             color="textSecondary"
             sx={{
               textAlign: 'center',
-              marginLeft: '15%',
+              marginLeft: '30%',
               transform: 'translateX(-20.5%)',
             }}
           >
@@ -59,9 +68,9 @@ const History: React.FC = () => {
         )}
       </Grid>
       <Grid>
-      <Button onClick={handleClearHistory}>
-        <img src={RubbishBinIcon} alt="Очистить" style={{ width: '25px', height: '25px' }} />
-      </Button>
+        <Button onClick={handleClearHistory}>
+          <img src={RubbishBinIcon} alt="Очистить" style={{ width: '25px', height: '25px' }} />
+        </Button>
       </Grid>
     </Grid>
   );

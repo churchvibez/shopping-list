@@ -1,8 +1,7 @@
 import React from "react";
-import '../styles/main.scss';
-
 import Button from '@mui/material/Button';
 import CloseIcon from '@mui/icons-material/Close';
+import '../styles/main.scss';
 
 // component used for code abstraction in active + history
 interface ListProps {
