@@ -20,15 +20,12 @@ import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
-import { addToActive, removeFromActive, clearActive } from "../store/store";
 import { Item } from "../store/store";
 import { useState } from "react";
 import '../styles/main.scss';
 
 const Active: React.FC = () => {
-  const activeList = useSelector((state: RootState) => state.active);
   const historyList = useSelector((state: RootState) => state.history);
-  const lastAdded = useSelector((state: RootState) => state.lastAdded);
   const dispatch = useDispatch<AppDispatch>();
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -324,7 +321,7 @@ const Active: React.FC = () => {
                             whiteSpace: 'nowrap',
                           }}
                         >
-                          {item.name} - {item.amount} {item.indices}
+                          {item.name} - {item.amount} {item.indices} - {item.totalPrice}
                         </Typography>
                     }/>
                       <IconButton

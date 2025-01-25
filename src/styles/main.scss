@@ -113,9 +113,15 @@ body {
     font-family: roboto;
   }
 
+  
+  .centered-list-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
   .custom-list {
-    padding-left: 30%;
-    padding-right: 30%;
     width: 100%;
     font-family: roboto;
   }
@@ -177,7 +183,7 @@ body {
   }
   
   .add-button-centered {
-    left: 47.5%;
+    left: 22.5%;
   }
   
   .empty-text {
