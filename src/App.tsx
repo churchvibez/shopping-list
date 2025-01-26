@@ -4,12 +4,14 @@ import ShoppingLists from "./pages/ShoppingLists";
 import History from "./pages/History";
 import ListItems from "./pages/ListItems";
 import { useState } from "react";
-import { AppBar, Toolbar, Typography, Tabs, Tab, Box, Button, Dialog, DialogTitle, TextField, DialogContent, DialogActions } from "@mui/material";
+import { AppBar, Toolbar, Typography, Tabs, Tab, Box, Button, Dialog, DialogTitle, TextField, DialogContent, DialogActions, DialogContentText } from "@mui/material";
 import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
-import { AppDispatch, createList } from "./store/store";
+import { AppDispatch, clearHistoryList, createList } from "./store/store";
 import { useDispatch } from "react-redux";
 import { saveListToDB } from "./db";
+import RubbishBinIcon from "./assets/rubbish-bin.svg";
 
+// page for our navigation and header
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -18,9 +20,21 @@ const App: React.FC = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // clear all data after confirming
+  const handleClearHistory = () => {
+    dispatch(clearHistoryList());
+    setConfirmOpen(false); 
+  };
+
+  const handleOpenConfirm = () => {
+    setConfirmOpen(true); 
+  };
 
   return (
     <Box className="app-container" sx={{ minHeight: "100vh", backgroundColor: "rgb(221, 230, 220)" }}>
+      {/* header */}
       <AppBar position="sticky" sx={{ backgroundColor: "rgb(148, 181, 145)" }}>
         <Toolbar>
           <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: "bold" }}>
@@ -36,23 +50,73 @@ const App: React.FC = () => {
                 <AddIcon />
               </Button>
               <Tab
-                label="Покупки"
+                label="Списки"
                 value="/lists"
                 component={Link}
                 to="/lists"
                 sx={{ fontWeight: "bold" }}
               />
               <Tab
-                label="Все продукты"
+                label="История покупок"
                 value="/history"
                 component={Link}
                 to="/history"
                 sx={{ fontWeight: "bold" }}
               />
+              <Button onClick={handleOpenConfirm}>
+                <img src={RubbishBinIcon} style={{ width: '18px', height: '18px' }} />
+              </Button>
           </Tabs>
         </Toolbar>
+
+        {/* dialog box for clearing all history */}
+        <Dialog
+          open={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+        >
+          <DialogTitle sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "5px",
+              width: "100%",
+            }}>
+              Очистить Историю
+          </DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Это очистит всю историю. Вы уверены, что хотите продолжить?
+              </DialogContentText>
+            </DialogContent>
+          
+          <DialogActions>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "5px",
+                width: "100%",
+              }}
+            >
+              <Button
+                onClick={handleClearHistory}
+                variant="contained"
+                color="primary"
+              >
+                Удалить
+              </Button>
+              <Button
+                onClick={() => setConfirmOpen(false)}
+                variant="contained"
+                color="error"
+              >
+                Отменить
+              </Button>
+            </Box>
+          </DialogActions>
+        </Dialog>
       </AppBar>
 
+      {/* routing/navigation */}
       <Box sx={{ padding: "2rem" }}>
         <Routes>
           <Route path="/" element={<Navigate to="/lists" replace />} />
@@ -63,6 +127,7 @@ const App: React.FC = () => {
         </Routes>
       </Box>
 
+      {/* option for adding a new list from the nav bar */}
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <DialogTitle>
           <Typography align="center" variant="h6" component="h2">
@@ -104,45 +169,48 @@ const App: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => {
-              
-              if (listName.trim() === "") {
-                console.warn("list name is empty");
-                return;
-              }
-
-              const listKey = `list-${Date.now()}`;
-
-              dispatch(createList({ key: listKey, name: listName}));
-
-              saveListToDB(listKey, {
-                key: listKey,
-                name: listName, 
-                items: [],
-                total: 0,
-              })
-
-              setListName("");
-              console.log("New Shopping List:", listName);
-              setIsDialogOpen(false);
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "5px",
+              width: "100%",
             }}
-            variant="contained"
-            color="success"
           >
-            Добавить
-          </Button>
-          <Button
-            onClick={() => setIsDialogOpen(false)}
-            variant="outlined"
-            color="error"
-          >
-            Отменить
-          </Button>
+            <Button
+              onClick={() => {
+                if (listName.trim() === "") {
+                  console.warn("list name is empty");
+                  return;
+                }
+
+                const listKey = `list-${Date.now()}`;
+                dispatch(createList({ key: listKey, name: listName}));
+                saveListToDB(listKey, {
+                  key: listKey,
+                  name: listName, 
+                  items: [],
+                  total: 0,
+                })
+
+                setListName("");
+                setIsDialogOpen(false);
+              }}
+              variant="contained"
+              color="success"
+            >
+              Добавить
+            </Button>
+            <Button
+              onClick={() => setIsDialogOpen(false)}
+              variant="contained"
+              color="error"
+            >
+              Отменить
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
-
-
     </Box>
   );
 };

@@ -1,52 +1,62 @@
-import React, { useEffect, useState } from "react";
+import React, { 
+  useEffect, 
+  useState 
+} from "react";
+import { 
+  Box, 
+  Button, 
+  Dialog, 
+  DialogActions, 
+  DialogContent, 
+  DialogTitle, 
+  TextField, 
+  Typography 
+} from "@mui/material";
+import { 
+  useDispatch, 
+  useSelector 
+} from "react-redux";
+import { 
+  AppDispatch, 
+  createList, 
+  RootState 
+} from "../store/store";
+import { 
+  getListFromDB, 
+  saveListToDB 
+} from "../db";
 import Grid from '@mui/material/Grid2';
 import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, createList, loadFromDB, RootState } from "../store/store";
 import { useNavigate } from "react-router-dom";
-import { getHistoryFromDB, getListFromDB, saveListToDB } from "../db";
 
 const ShoppingLists: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const lists = useSelector((state: RootState) => state.shoppingLists);
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
 
+  // hook to control getting all lists from indexedDB
   useEffect(() => {
     (async () => {
-      const allKeys = await getListFromDB(""); // Fetch all keys from IndexedDB
+      const allKeys = await getListFromDB("");
       const shoppingLists = [];
       for (const key of allKeys) {
         const list = await getListFromDB(key);
         if (list) shoppingLists.push(list);
       }
-
-      const history = await getHistoryFromDB("history");
-
-      dispatch(
-        loadFromDB({
-          shoppingLists,
-          history: history && history.items && history.totalSpent !== undefined
-            ? history
-            : {
-                items: [], // Default empty array for history items
-                totalSpent: 0, // Default total spent
-              },
-        })
-      );
     })();
   }, [dispatch]);
 
+  // creating a new list
   const handleCreateList = () => {
     if (listName.trim() === "") {
       console.warn("List name is empty");
       return;
     }
 
+    // call reducer to create the list and save it to DB
+    // unique key based on the current date and time
     const listKey = `list-${Date.now()}`;
     dispatch(createList({ key: listKey, name: listName }));
 
@@ -73,6 +83,7 @@ const ShoppingLists: React.FC = () => {
         alignItems="center"
         justifyContent="center"
       >
+        {/* display all our lists */}
         {lists.length > 0 && (
           lists.map((list) => (
             <Grid key={list.key} sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
@@ -83,8 +94,8 @@ const ShoppingLists: React.FC = () => {
                   textTransform: "none",
                   fontWeight: "bold",
                   width: "200px",
-                  borderColor: "#94b591",
-                  color: "#94b591",
+                  borderColor: " #263f24",
+                  color: " #263f24",
                   "&:hover": {
                     borderColor: "#7ca577",
                     backgroundColor: "rgba(148, 181, 145, 0.1)",
@@ -103,6 +114,7 @@ const ShoppingLists: React.FC = () => {
         )}
       </Grid>
 
+      {/* button to add list */}
       <Grid
         container
         spacing={2}
@@ -115,8 +127,8 @@ const ShoppingLists: React.FC = () => {
           variant="outlined"
           onClick={() => setIsDialogOpen(true)}
           sx={{
-            borderColor: "#94b591",
-            color: "#94b591",
+            borderColor: " #263f24",
+            color: "#263f24",
             textTransform: "none",
             fontWeight: "bold",
             "&:hover": {
@@ -131,10 +143,9 @@ const ShoppingLists: React.FC = () => {
         >
           <AddIcon />
         </Button>
-
       </Grid>
 
-      {/* Dialog for creating new list */}
+      {/* dialog for creating new list */}
       <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <DialogTitle>
           <Typography align="center" variant="h6" component="h2">
@@ -171,16 +182,25 @@ const ShoppingLists: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCreateList} variant="outlined" color="success">
-            Добавить
-          </Button>
-          <Button
-            onClick={() => setIsDialogOpen(false)}
-            variant="outlined"
-            color="error"
+          <Box
+          sx={{
+            display: "flex",
+              justifyContent: "center", 
+              gap: "5px",
+              width: "100%",
+          }}
           >
-            Отменить
-          </Button>
+            <Button onClick={handleCreateList} variant="contained" color="success">
+              Добавить
+            </Button>
+            <Button
+              onClick={() => setIsDialogOpen(false)}
+              variant="contained"
+              color="error"
+            >
+              Отменить
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
     </div>

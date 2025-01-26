@@ -4,31 +4,39 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
-import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid2";
-import RubbishBinIcon from "../assets/rubbish-bin.svg";
-import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
-import { clearHistoryList } from "../store/store";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
+
+// page for history of all transactions
 
 const History: React.FC = () => {
-  const historyList = useSelector((state: RootState) => state.history);
-  const dispatch = useDispatch<AppDispatch>();
 
-  const handleClearHistory = () => {
-    dispatch(clearHistoryList());
-  };
+  const historyList = useSelector((state: RootState) => state.history);
 
   return (
-    <><Typography variant="h6" color="textSecondary">
-      Total: ₽{historyList.totalSpent?.toFixed(2) || "0.00"}
-    </Typography><Grid
-      container
-      direction="column"
-      alignItems="center"
-      sx={{ marginTop: "1.2%", marginLeft: "10%" }}
-    >
+    <div className="container mt-4" style={{maxWidth: "1000px"}}>
+    
+      {/* historical total */}
+      <Typography variant="h6" color="textSecondary"
+        align="center"
+        sx={{
+          flexGrow: 1,
+          textAlign: "center",
+          fontWeight: "bold",
+        }}
+      >
+        Общая сумма: ₽{historyList.totalSpent?.toFixed(2) || "0.00"}
+      </Typography>
+
+      {/* all historical transactions */}
+      <Grid
+        container
+        direction="column"
+        alignItems="center"
+        sx={{ marginTop: "3%" }}
+      >
         <Grid
           size={{ md: 5 }}
         >
@@ -61,12 +69,8 @@ const History: React.FC = () => {
             </Typography>
           )}
         </Grid>
-        <Grid>
-          <Button onClick={handleClearHistory}>
-      <img src={RubbishBinIcon} alt="Очистить" style={{ width: '25px', height: '25px' }} />
-    </Button>
-        </Grid>
-      </Grid></>
+      </Grid>
+    </div>
   );
 };
 

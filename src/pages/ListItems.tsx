@@ -1,6 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useNavigate, 
+  useParams 
+} from "react-router-dom";
+import { 
+  useSelector, 
+  useDispatch 
+} from "react-redux";
 import {
   RootState,
   AppDispatch,
@@ -10,7 +15,6 @@ import {
   selectTopRecommendations,
   updateItemInList,
   updateListTotal,
-  removeItemFromListAndUpdateTotal,
   addToHistory,
   deleteList,
 } from "../store/store";
@@ -30,12 +34,17 @@ import {
   Tabs,
   Tab,
   Autocomplete,
+  Box,
+  ListItemButton,
 } from "@mui/material";
 import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import Grid from "@mui/material/Grid2";
 import "../styles/main.scss";
+
+// list of all suggested products in alphabetical order
 
 const russianProducts = Array.from(
   new Set([
@@ -57,7 +66,6 @@ const russianProducts = Array.from(
     "ежевика",
     "ежики (из мяса)",
     "еда для кошек",
-    "ёгурт",
     "ёлочные игрушки",
     "ёжики (для дома)",
     "желе",
@@ -122,14 +130,10 @@ const russianProducts = Array.from(
     "щи",
     "щавель",
     "щука",
-    "ъёмкостные баночки",
-    "ъёмкость для масла",
-    "ырка (сметана с зеленью)",
-    "ьемкости для хранения",
+    "ёмкостные баночки",
+    "ёмкость для масла",
     "эскимо",
     "эклеры",
-    "эстрагон",
-    "юкола",
     "южные фрукты",
     "яблоки",
     "ягоды",
@@ -142,15 +146,6 @@ const ListItems: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const recommendations = useSelector(selectTopRecommendations);
   const navigate = useNavigate();
-  const shoppingList = useSelector((state: RootState) =>
-    state.shoppingLists.find((list) => list.key === key)
-  );
-  
-  const purchasedItems =
-    shoppingList?.items.filter((item) => item.pricePerUnit !== undefined) || [];
-  const inListItems =
-    shoppingList?.items.filter((item) => item.pricePerUnit === undefined) || [];
-
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [product, setProduct] = useState("");
   const [amount, setAmount] = useState("");
@@ -159,7 +154,19 @@ const ListItems: React.FC = () => {
   const [isPricePopupOpen, setIsPricePopupOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [price, setPrice] = useState<string>("");
+  const [productError, setProductError] = useState(false);
+  const [amountError, setAmountError] = useState(false);
+  const [indicesError, setIndicesError] = useState(false);
 
+  const shoppingList = useSelector((state: RootState) =>
+    state.shoppingLists.find((list) => list.key === key)
+  );
+  const purchasedItems =
+    shoppingList?.items.filter((item) => item.pricePerUnit !== undefined) || [];
+  const inListItems =
+    shoppingList?.items.filter((item) => item.pricePerUnit === undefined) || [];
+
+  // measurement units when adding a product
   const measurementUnits = [
     "килограммы",
     "литры",
@@ -173,19 +180,40 @@ const ListItems: React.FC = () => {
     "центнеры",
   ];
 
+  // logic for input requirement when adding a product
   const handleAdd = () => {
-    if (product.trim()) {
-      const newItem: Item = { name: product.trim(), amount: amount, indices: indices };
-      dispatch(addItemToList({ key: key!, item: newItem }));
-      setProduct("");
-      setAmount("");
-      setIndices("");
-      setIsPopupOpen(false);
+    let valid = true;
+  
+    if (!product.trim()) {
+      setProductError(true);
+      valid = false;
+    } else {
+      setProductError(false);
     }
-  };
+  
+    if (!amount.trim()) {
+      setAmountError(true);
+      valid = false;
+    } else {
+      setAmountError(false);
+    }
+  
+    if (!indices.trim()) {
+      setIndicesError(true);
+      valid = false;
+    } else {
+      setIndicesError(false);
+    }
+  
+    if (!valid) return;
+  
+    const newItem: Item = { name: product.trim(), amount: amount, indices: indices };
+    dispatch(addItemToList({ key: key!, item: newItem }));
 
-  const handleRemove = (listKey: string, itemName: string) => {
-    dispatch(removeItemFromList({ listKey, itemName }));
+    setProduct("");
+    setAmount("");
+    setIndices("");
+    setIsPopupOpen(false);
   };
 
   const togglePopup = () => {
@@ -194,26 +222,57 @@ const ListItems: React.FC = () => {
 
   return (
     <div className="container-fluid page-container">
-      <div className="container mt-4">
-    
-  <Typography variant="h4" align="center" sx={{ flexGrow: 1, textAlign: "center" }}>
-    List: {shoppingList?.name || "Список покупок"}
-    <IconButton
-        edge="end"
-        color="error"
-        onClick={() => {
-            if (key) {
+      <div className="container mt-4" style={{maxWidth: "1000px"}}>
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "47%",
+            margin: "0 auto",
+          }}
+        >
+          {/* arrow to go back to list of lists */}
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => navigate("/lists")}
+            sx={{ marginRight: "auto" }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          {/* total price of the list */}
+          <Typography
+            variant="h4"
+            align="center"
+            sx={{
+              flexGrow: 1,
+              textAlign: "center",
+              fontWeight: "bold",
+            }}
+          >
+            Список: {shoppingList?.name || "Список покупок"}
+          </Typography>
+
+          <IconButton
+            edge="end"
+            color="error"
+            onClick={() => {
+              if (shoppingList?.key) {
                 dispatch(deleteList(shoppingList.key));
                 navigate("/lists");
+              } else {
+                console.warn("list doesn't have a key");
               }
-        }}
-    >
-        <DeleteIcon />
-    </IconButton>
-  </Typography>
+            }}
+            sx={{ marginLeft: "auto" }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
 
-
-        {/* Dialog for adding items */}
+        {/* dialog to add a product */}
         <Dialog
           open={isPopupOpen}
           onClose={togglePopup}
@@ -233,10 +292,10 @@ const ListItems: React.FC = () => {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={4}>
-              {/* Left column */}
-              <Grid item xs={6}>
+              <Grid>
                 <Grid container spacing={4} direction="column" sx={{ marginTop: "7%" }}>
-                  <Grid item>
+                  {/* input field for product name */}
+                  <Grid>
                     <Autocomplete
                       freeSolo
                       options={Array.from(
@@ -255,24 +314,35 @@ const ListItems: React.FC = () => {
                           label="Название продукта"
                           placeholder="Например: хлеб..."
                           className="popup-input"
+                          error={productError}
+                          helperText={productError ? "Требуется": ""}
                         />
                       )}
                     />
                   </Grid>
-
-                  <Grid item>
+                  
+                  {/* input field for product quantity */}
+                  <Grid>
                     <TextField
                       fullWidth
                       variant="outlined"
                       value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d*$/.test(value)) {
+                          setAmount(value);
+                        }
+                      }}
                       label="Количество"
                       placeholder="Например: 3..."
                       className="popup-input"
+                      error={amountError}
+                      helperText={amountError ? "Требуется": ""}
                     />
                   </Grid>
 
-                  <Grid item>
+                  {/* input field for product measurements*/}
+                  <Grid>
                     <Autocomplete
                       freeSolo
                       options={measurementUnits}
@@ -286,6 +356,8 @@ const ListItems: React.FC = () => {
                           label="Единицы измерения"
                           placeholder="Например: литры..."
                           className="popup-input"
+                          error={indicesError}
+                          helperText={indicesError ? "Требуется": ""}
                         />
                       )}
                     />
@@ -295,14 +367,14 @@ const ListItems: React.FC = () => {
                   <Button variant="contained" color="success" onClick={handleAdd}>
                     Добавить
                   </Button>
-                  <Button variant="outlined" color="error" onClick={togglePopup}>
+                  <Button variant="contained" color="error" onClick={togglePopup}>
                     Отменить
                   </Button>
                 </DialogActions>
               </Grid>
 
-              {/* Right column */}
-              <Grid item xs={6}>
+              {/* recommendations and items by alphabet */}
+              <Grid>
                 <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} centered>
                   <Tab label="Рекомендации" />
                   <Tab label="А-Я" />
@@ -310,18 +382,21 @@ const ListItems: React.FC = () => {
                 {activeTab === 0 && (
                   <List sx={{ maxHeight: "300px", overflowY: "auto" }}>
                     {recommendations.map((item, index) => (
-                      <ListItem key={index} button="true" onClick={() => setProduct(item.name)}>
+                      <ListItemButton
+                        key={index}
+                        onClick={() => setProduct(item.name)}
+                      >
                         <ListItemText primary={`${item.name}`} />
-                      </ListItem>
+                      </ListItemButton>
                     ))}
                   </List>
                 )}
                 {activeTab === 1 && (
                   <List sx={{ maxHeight: "300px", overflowY: "auto" }}>
                     {russianProducts.map((letter, index) => (
-                      <ListItem key={index} button="true" onClick={() => setProduct(letter)}>
+                      <ListItemButton key={index} onClick={() => setProduct(letter)}>
                         <ListItemText primary={letter} />
-                      </ListItem>
+                      </ListItemButton>
                     ))}
                   </List>
                 )}
@@ -330,7 +405,7 @@ const ListItems: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Display purchased and in-list items */}
+        {/* items the user has purchased in that list */}
         {shoppingList && shoppingList.items.length > 0 ? (
           <>
           <Typography
@@ -338,85 +413,82 @@ const ListItems: React.FC = () => {
             align="center"
             sx={{ marginTop: "20px", textDecoration: "underline" }}
           >
-            Purchased
+            Куплено
           </Typography>
-          
-          <Grid className="centered-list-container">
-          <List sx={{width: "50%"}}>
-            {purchasedItems.map((item) => (
-              <ListItem className="custom-list-item" key={item.name}>
-                <ListItemIcon>
-                  <FormatListBulletedOutlinedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={`${item.name} - ${item.amount} ${item.indices}`}
-                  secondary={`Total: ₽${(item.pricePerUnit! * parseFloat(item.amount)).toFixed(2)}`}
-                />
-                <IconButton
-                  edge="end"
-                  color="error"
-                  onClick={() => {
-                    dispatch(removeItemFromList({ listKey: key!, itemName: item.name }));
-                    dispatch(
-                      updateListTotal({
-                        listKey: key!,
-                        newTotal:
-                          shoppingList.total -
-                          item.pricePerUnit! * parseFloat(item.amount),
-                      })
-                    );
-                  }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItem>
-            ))}
-          </List>
-
-          </Grid>
-          
         
+          <Grid className="centered-list-container">
+            <List sx={{width: "50%"}}>
+              {purchasedItems.map((item) => (
+                <ListItem className="custom-list-item" key={item.name}>
+                  <ListItemIcon>
+                    <FormatListBulletedOutlinedIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={`${item.name} - ${item.amount} ${item.indices}`}
+                    secondary={`Сумма: ₽${(item.pricePerUnit! * parseFloat(item.amount)).toFixed(2)}`}
+                  />
+                  <IconButton
+                    edge="end"
+                    color="error"
+                    onClick={() => {
+                      dispatch(removeItemFromList({ listKey: key!, itemName: item.name }));
+                      dispatch(
+                        updateListTotal({
+                          listKey: key!,
+                          newTotal:
+                            shoppingList.total -
+                            item.pricePerUnit! * parseFloat(item.amount),
+                        })
+                      );
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItem>
+              ))}
+            </List>
+          </Grid>
+        
+          {/* items the user has not purchased yet */}
           <Typography
             variant="h5"
             align="center"
             sx={{ marginTop: "20px", textDecoration: "underline" }}
           >
-            In List
+            В списке
           </Typography>
           <Grid className="centered-list-container">
-          <List sx={{width: "50%"}}>
-            {inListItems.map((item) => (
-              <ListItem
-                className="custom-list-item"
-                key={item.name}
-                button
-                onClick={() => {
-                  setSelectedItem(item);
-                  setIsPricePopupOpen(true);
-                }}
-              >
-                <ListItemIcon>
-                  <FormatListBulletedOutlinedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={`${item.name} - ${item.amount} ${item.indices}`}
-                />
-                <IconButton
-                  edge="end"
-                  color="error"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    dispatch(removeItemFromList({ listKey: key!, itemName: item.name }));
+            <List sx={{width: "50%"}}>
+              {inListItems.map((item) => (
+                <ListItemButton
+                  className="custom-list-item"
+                  key={item.name}
+                  onClick={() => {
+                    setSelectedItem(item);
+                    setIsPricePopupOpen(true);
                   }}
                 >
-                  <DeleteIcon />
-                </IconButton>
-              </ListItem>
-            ))}
-          </List>
+                  <ListItemIcon>
+                    <FormatListBulletedOutlinedIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={`${item.name} - ${item.amount} ${item.indices}`}
+                  />
+                  <IconButton
+                    edge="end"
+                    color="error"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch(removeItemFromList({ listKey: key!, itemName: item.name }));
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemButton>
+              ))}
+            </List>
           </Grid>
         </>
-        
         ) : (
           <Typography align="center" variant="h6" color="textSecondary">
             Список пуст!
@@ -434,12 +506,12 @@ const ListItems: React.FC = () => {
           </Button>
         </Grid>
 
-        {/* Dialog for price input */}
+        {/* popup for adding the price of a product */}
         <Dialog
           open={isPricePopupOpen}
           onClose={() => {
             setIsPricePopupOpen(false);
-            setSelectedItem(null); // Clear the selected item when closed
+            setSelectedItem(null);
           }}
         >
           <DialogTitle>
@@ -451,23 +523,39 @@ const ListItems: React.FC = () => {
             <TextField
               fullWidth
               variant="outlined"
+              type="text"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              sx={{marginTop: "2%"}}
+              onChange={(e) => {
+                const value = e.target.value;
+                // this ensures that we only have only numbers
+                // 1 decimal point, and only 2 numbers after the d.p.
+                if (value === "" || /^\d+(\.\d{0,2})?$/.test(value)) {
+                  setPrice(value);
+                }
+              }}
               label="Цена за штуку"
               placeholder="Введите цену"
               className="popup-input"
             />
           </DialogContent>
           <DialogActions>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "5px",
+                width: "100%",
+              }}
+            >
             <Button
               variant="contained"
               color="success"
               onClick={() => {
                 if (selectedItem && price.trim()) {
-                  const totalSpent =
-                    parseFloat(price) * parseFloat(selectedItem.amount);
+                  const totalSpent = parseFloat(price) * parseFloat(selectedItem.amount);
 
-                  // Dispatch action to update the list total
+                  // update the item price in the list 
                   dispatch(
                     updateItemInList({
                       key: key!,
@@ -477,9 +565,9 @@ const ListItems: React.FC = () => {
                       },
                     })
                   );
-
-                  // Update the list total
-                  const x = shoppingList?.total + totalSpent;
+                  
+                  // update the list total
+                  const x = (shoppingList?.total ?? 0) + totalSpent;
                   dispatch(
                     updateListTotal({
                       listKey: key!,
@@ -487,6 +575,7 @@ const ListItems: React.FC = () => {
                     })
                   );
 
+                  // add the purchased item to the history
                   dispatch(
                     addToHistory({
                       item: selectedItem,
@@ -495,29 +584,33 @@ const ListItems: React.FC = () => {
                     })
                   );
 
-                  setPrice(""); // Reset price input
-                  setIsPricePopupOpen(false); // Close dialog
+                  setPrice("");
+                  setIsPricePopupOpen(false);
                 }
               }}
             >
               Добавить
             </Button>
             <Button
-              variant="outlined"
+              variant="contained"
               color="error"
               onClick={() => {
                 setIsPricePopupOpen(false);
-                setSelectedItem(null); // Clear the selected item
-                setPrice(""); // Reset price input
+                setSelectedItem(null);
+                setPrice("");
               }}
             >
               Отменить
             </Button>
+            </Box>
           </DialogActions>
         </Dialog>
+
+        {/* total for that shopping list */}
         <Typography variant="h6" color="textSecondary" align="center">
-    Total: ₽{shoppingList?.total?.toFixed(2) || "0.00"}
-  </Typography>
+          Общая сумма: ₽{shoppingList?.total?.toFixed(2) || "0.00"}
+        </Typography>
+        
       </div>
     </div>
   );

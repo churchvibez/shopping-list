@@ -9,6 +9,8 @@ import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBullet
 import { Item } from "../store/store";
 import { Typography } from "@mui/material";
 
+// component used for lists and every list item in current + history
+
 interface CustomListProps {
   items: Item[];
   onDelete?: (item: string) => void;
