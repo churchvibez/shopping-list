@@ -457,7 +457,7 @@ const ListItems: React.FC = () => {
           <Typography
             variant="h5"
             align="center"
-            sx={{ marginTop: "20px", textDecoration: "underline", fontSize: "1.2rem" }}
+            sx={{ marginTop: "20px", textDecoration: "underline", fontSize: "1.5rem" }}
           >
             В списке
           </Typography>

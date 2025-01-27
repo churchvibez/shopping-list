@@ -40,7 +40,17 @@ const App: React.FC = () => {
           <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: "bold" }}>
             Список Покупок
           </Typography>
-          <Tabs value={currentTab} textColor="inherit" indicatorColor="primary">
+          <Tabs 
+          value={currentTab}
+          textColor="inherit"
+          indicatorColor="primary"
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            maxWidth: "100%", 
+            overflowX: "auto",
+          }}
+          >
               <Button
                 color="inherit"
                 onClick={() => setIsDialogOpen(true)}
