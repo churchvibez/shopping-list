@@ -222,15 +222,15 @@ const ListItems: React.FC = () => {
 
   return (
     <div className="container-fluid page-container">
-      <div className="container mt-4" style={{maxWidth: "1000px"}}>
+      <div className="container mt-4" style={{maxWidth: "100%", margin: "0 auto"}}>
 
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            width: "47%",
-            margin: "0 auto",
+            width: "100%",
+            margin: "0 0px",
           }}
         >
           {/* arrow to go back to list of lists */}
@@ -244,7 +244,7 @@ const ListItems: React.FC = () => {
           </IconButton>
           {/* total price of the list */}
           <Typography
-            variant="h4"
+            variant="h5"
             align="center"
             sx={{
               flexGrow: 1,
@@ -277,10 +277,10 @@ const ListItems: React.FC = () => {
           open={isPopupOpen}
           onClose={togglePopup}
           fullWidth
-          maxWidth="xl"
+          maxWidth="sm"
           sx={{
             "& .MuiDialog-paper": {
-              width: "600px",
+              width: "95%",
               height: "500px",
             },
           }}
@@ -416,8 +416,8 @@ const ListItems: React.FC = () => {
             Куплено
           </Typography>
         
-          <Grid className="centered-list-container">
-            <List sx={{width: "50%"}}>
+          <Grid container justifyContent="center" sx={{ padding: "0 10px" }}>
+            <List sx={{ width: "100%", maxWidth: "600px" }}>
               {purchasedItems.map((item) => (
                 <ListItem className="custom-list-item" key={item.name}>
                   <ListItemIcon>
@@ -426,6 +426,10 @@ const ListItems: React.FC = () => {
                   <ListItemText
                     primary={`${item.name} - ${item.amount} ${item.indices}`}
                     secondary={`Сумма: ₽${(item.pricePerUnit! * parseFloat(item.amount)).toFixed(2)}`}
+                    sx={{
+                      wordBreak: "break-word", 
+                      overflowWrap: "anywhere",
+                    }}
                   />
                   <IconButton
                     edge="end"
@@ -453,12 +457,12 @@ const ListItems: React.FC = () => {
           <Typography
             variant="h5"
             align="center"
-            sx={{ marginTop: "20px", textDecoration: "underline" }}
+            sx={{ marginTop: "20px", textDecoration: "underline", fontSize: "1.2rem" }}
           >
             В списке
           </Typography>
-          <Grid className="centered-list-container">
-            <List sx={{width: "50%"}}>
+          <Grid container justifyContent="center" sx={{ padding: "0 10px" }}>
+            <List sx={{ width: "100%", maxWidth: "600px" }}>
               {inListItems.map((item) => (
                 <ListItemButton
                   className="custom-list-item"
@@ -472,6 +476,10 @@ const ListItems: React.FC = () => {
                     <FormatListBulletedOutlinedIcon />
                   </ListItemIcon>
                   <ListItemText
+                  sx={{
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
+                  }}
                     primary={`${item.name} - ${item.amount} ${item.indices}`}
                   />
                   <IconButton
@@ -495,16 +503,17 @@ const ListItems: React.FC = () => {
           </Typography>
         )}
 
-        <Grid container justifyContent="center" sx={{ marginTop: "20px" }}>
+        <Grid container justifyContent="center" sx={{ marginTop: "20px", padding: "0 10px" }}>
           <Button
             variant="contained"
             color="success"
             onClick={togglePopup}
-            className="add-button-centered"
+            sx={{ width: "60px", height: "60px", borderRadius: "50%" }}
           >
             <AddIcon />
           </Button>
         </Grid>
+
 
         {/* popup for adding the price of a product */}
         <Dialog
@@ -513,7 +522,16 @@ const ListItems: React.FC = () => {
             setIsPricePopupOpen(false);
             setSelectedItem(null);
           }}
+          fullWidth
+          maxWidth="xs"
+          sx={{
+            "& .MuiDialog-paper": {
+              width: "90%",
+              maxWidth: "400px",
+            },
+          }}
         >
+
           <DialogTitle>
             <Typography align="center" variant="h6" component="h2">
               Укажите цену
@@ -607,9 +625,15 @@ const ListItems: React.FC = () => {
         </Dialog>
 
         {/* total for that shopping list */}
-        <Typography variant="h6" color="textSecondary" align="center">
+        <Typography
+          variant="h6"
+          color="textSecondary"
+          align="center"
+          sx={{ fontSize: "1rem", marginBottom: "20px", marginTop: "10px" }}
+        >
           Общая сумма: ₽{shoppingList?.total?.toFixed(2) || "0.00"}
         </Typography>
+
         
       </div>
     </div>

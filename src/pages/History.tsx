@@ -16,15 +16,19 @@ const History: React.FC = () => {
   const historyList = useSelector((state: RootState) => state.history);
 
   return (
-    <div className="container mt-4" style={{maxWidth: "1000px"}}>
+    <div className="container mt-4" style={{maxWidth: "90%", margin: "0 auto"}}>
     
       {/* historical total */}
-      <Typography variant="h6" color="textSecondary"
+      <Typography
+        variant="h6"
+        color="textSecondary"
         align="center"
         sx={{
           flexGrow: 1,
           textAlign: "center",
           fontWeight: "bold",
+          fontSize: "1rem",
+          marginBottom: "15px",
         }}
       >
         Общая сумма: ₽{historyList.totalSpent?.toFixed(2) || "0.00"}
@@ -35,23 +39,38 @@ const History: React.FC = () => {
         container
         direction="column"
         alignItems="center"
-        sx={{ marginTop: "3%" }}
+        sx={{
+          marginTop: "3%",
+          padding: "0 10px", // Add horizontal padding for better spacing
+        }}
       >
-        <Grid
-          size={{ md: 5 }}
-        >
+        <Grid>
           {historyList && historyList.items.length > 0 ? (
-            <List className="custom-list">
+            <List
+              className="custom-list"
+              sx={{
+                width: "100%", // Full width for smaller screens
+                maxWidth: "600px", // Constrain width on larger screens
+              }}
+            >
               {historyList.items.slice().reverse().map((item, index) => (
-                <ListItem className="custom-list-item" key={index}>
+                <ListItem
+                  className="custom-list-item"
+                  key={index}
+                  sx={{
+                    padding: "10px 0", // Add vertical spacing between list items
+                  }}
+                >
                   <ListItemIcon>
                     <FormatListBulletedOutlinedIcon />
                   </ListItemIcon>
-                  <ListItemText primary={<Typography
-                    sx={{}}
-                  >
-                    {item.name} - {item.amount} {item.indices} - ₽{item.totalPrice}
-                  </Typography>} />
+                  <ListItemText
+                    primary={
+                      <Typography sx={{ fontSize: "0.9rem" }}>
+                        {item.name} - {item.amount} {item.indices} - ₽{item.totalPrice}
+                      </Typography>
+                    }
+                  />
                 </ListItem>
               ))}
             </List>
@@ -59,10 +78,12 @@ const History: React.FC = () => {
             <Typography
               variant="h6"
               color="textSecondary"
+              align="center"
               sx={{
-                textAlign: 'center',
-                marginLeft: '30%',
-                transform: 'translateX(-20.5%)',
+                marginTop: "20px",
+                fontSize: "1rem", // Slightly smaller font size for mobile
+                marginLeft: "0", // Center-align on mobile
+                transform: "none", // Remove translateX for better alignment
               }}
             >
               Нет истории
@@ -70,6 +91,7 @@ const History: React.FC = () => {
           )}
         </Grid>
       </Grid>
+
     </div>
   );
 };
