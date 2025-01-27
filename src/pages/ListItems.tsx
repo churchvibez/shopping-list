@@ -374,7 +374,7 @@ const ListItems: React.FC = () => {
               </Grid>
 
               {/* recommendations and items by alphabet */}
-              <Grid>
+              <Grid sx={{width: "260px"}}>
                 <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} centered>
                   <Tab label="Рекомендации" />
                   <Tab label="А-Я" />
@@ -383,10 +383,21 @@ const ListItems: React.FC = () => {
                   <List sx={{ maxHeight: "300px", overflowY: "auto" }}>
                     {recommendations.map((item, index) => (
                       <ListItemButton
+                        sx={{
+                          whiteSpace: "normal",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word",
+                        }}
                         key={index}
                         onClick={() => setProduct(item.name)}
                       >
-                        <ListItemText primary={`${item.name}`} />
+                        <ListItemText 
+                          sx={{
+                            whiteSpace: "normal",
+                            overflowWrap: "break-word",
+                            wordBreak: "break-word",
+                          }}
+                        primary={`${item.name}`} />
                       </ListItemButton>
                     ))}
                   </List>
@@ -417,7 +428,7 @@ const ListItems: React.FC = () => {
           </Typography>
         
           <Grid container justifyContent="center" sx={{ padding: "0 10px" }}>
-            <List sx={{ width: "100%", maxWidth: "600px" }}>
+            <List sx={{ width: "100%", maxWidth: "600px", wordBreak: "break-word" }}>
               {purchasedItems.map((item) => (
                 <ListItem className="custom-list-item" key={item.name}>
                   <ListItemIcon>
@@ -426,10 +437,7 @@ const ListItems: React.FC = () => {
                   <ListItemText
                     primary={`${item.name} - ${item.amount} ${item.indices}`}
                     secondary={`Сумма: ₽${(item.pricePerUnit! * parseFloat(item.amount)).toFixed(2)}`}
-                    sx={{
-                      wordBreak: "break-word", 
-                      overflowWrap: "anywhere",
-                    }}
+                    
                   />
                   <IconButton
                     edge="end"
@@ -457,12 +465,12 @@ const ListItems: React.FC = () => {
           <Typography
             variant="h5"
             align="center"
-            sx={{ marginTop: "20px", textDecoration: "underline", fontSize: "1.5rem" }}
+            sx={{ marginTop: "20px", textDecoration: "underline", fontSize: "1.2rem" }}
           >
             В списке
           </Typography>
           <Grid container justifyContent="center" sx={{ padding: "0 10px" }}>
-            <List sx={{ width: "100%", maxWidth: "600px" }}>
+            <List sx={{ width: "100%", maxWidth: "600px", wordBreak: "break-word" }}>
               {inListItems.map((item) => (
                 <ListItemButton
                   className="custom-list-item"
@@ -476,10 +484,6 @@ const ListItems: React.FC = () => {
                     <FormatListBulletedOutlinedIcon />
                   </ListItemIcon>
                   <ListItemText
-                  sx={{
-                    wordBreak: "break-word",
-                    overflowWrap: "anywhere",
-                  }}
                     primary={`${item.name} - ${item.amount} ${item.indices}`}
                   />
                   <IconButton
