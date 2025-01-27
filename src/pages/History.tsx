@@ -41,7 +41,7 @@ const History: React.FC = () => {
         alignItems="center"
         sx={{
           marginTop: "3%",
-          padding: "0 10px", // Add horizontal padding for better spacing
+          padding: "0 10px",
         }}
       >
         <Grid>
@@ -49,8 +49,9 @@ const History: React.FC = () => {
             <List
               className="custom-list"
               sx={{
-                width: "100%", // Full width for smaller screens
-                maxWidth: "600px", // Constrain width on larger screens
+                width: "100%",
+                maxWidth: "400px",
+                wordBreak: "break-word"
               }}
             >
               {historyList.items.slice().reverse().map((item, index) => (
@@ -58,7 +59,7 @@ const History: React.FC = () => {
                   className="custom-list-item"
                   key={index}
                   sx={{
-                    padding: "10px 0", // Add vertical spacing between list items
+                    padding: "10px 0",
                   }}
                 >
                   <ListItemIcon>
@@ -81,9 +82,9 @@ const History: React.FC = () => {
               align="center"
               sx={{
                 marginTop: "20px",
-                fontSize: "1rem", // Slightly smaller font size for mobile
-                marginLeft: "0", // Center-align on mobile
-                transform: "none", // Remove translateX for better alignment
+                fontSize: "1rem",
+                marginLeft: "0",
+                transform: "none",
               }}
             >
               Нет истории
