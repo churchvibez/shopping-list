@@ -23,18 +23,25 @@ export interface HistoryItem extends Item {
   totalPrice: number;
 }
 
-interface AppState {
+export interface HistoryEntry {
+  listKey: string;
+  listName: string;
+  purchases: HistoryItem[];
+  total: number;
+}
+
+export interface AppState {
   shoppingLists: ShoppingList[];
   history: {
-    items: HistoryItem[];
-    totalSpent: number; 
+    lists: { [key: string]: HistoryEntry };
+    totalSpent: number;
   };
 }
 
 const initialState: AppState = {
   shoppingLists: [],
   history: {
-    items: [],
+    lists: {},
     totalSpent: 0,
   },
 };
@@ -45,7 +52,22 @@ const appSlice = createSlice({
   initialState,
   reducers: {
     createList(state, action: PayloadAction<{ key: string; name: string }>) {
-      state.shoppingLists.push({ key: action.payload.key, name: action.payload.name, items: [], total: 0 });
+      const { key, name } = action.payload;
+
+      const sameName = state.shoppingLists.find(
+        (list) => list.name.toLowerCase() === name.toLowerCase()
+      );
+
+      if (sameName) {
+        console.warn("name already exists");
+        return;
+      }
+
+      state.shoppingLists.push({ key, name, items: [], total: 0 });
+    
+      if (!state.history.lists[key]) {
+        state.history.lists[key] = { listKey: key, listName: name, purchases: [], total: 0 };
+      }
     },
 
     addItemToList(state, action: PayloadAction<{ key: string; item: Item }>) {
@@ -96,39 +118,29 @@ const appSlice = createSlice({
         }
     },
     
-    purchaseItem(
-        state,
-        action: PayloadAction<{ listKey: string; itemName: string; pricePerUnit: number }>
-      ) {
-        const { listKey, itemName, pricePerUnit } = action.payload;
-        const shoppingList = state.shoppingLists.find((list) => list.key === listKey);
-      
-        if (shoppingList) {
-          const item = shoppingList.items.find((i) => i.name === itemName);
-          
-          if (item) {
-            const totalSpent = parseFloat(item.amount) * pricePerUnit;
-            const historyItem = state.history.items.find((h) => h.name.toLowerCase() === item.name.toLowerCase());
-            
-            if (historyItem) {
-              historyItem.popularity = (historyItem.popularity || 0) + 1;
-              historyItem.totalPrice += totalSpent;
-            } else {
-              state.history.items.push({
-                ...item,
-                totalPrice: totalSpent,
-                pricePerUnit,
-                popularity: 1,
-              });
-            }
-      
-            state.history.totalSpent += totalSpent;
-            const newTotal = (shoppingList.total || 0) + totalSpent;
-            shoppingList.total = newTotal;
-            shoppingList.items = shoppingList.items.filter((i) => i.name !== itemName);
-          }
+    purchaseItem(state, action: PayloadAction<{ listKey: string; itemName: string; pricePerUnit: number }>) {
+      const { listKey, itemName, pricePerUnit } = action.payload;
+      const shoppingList = state.shoppingLists.find((list) => list.key === listKey);
+    
+      if (shoppingList) {
+        const item = shoppingList.items.find((i) => i.name === itemName);
+        if (item) {
+          const totalSpent = parseFloat(item.amount) * pricePerUnit;
+    
+          const historyEntry = state.history.lists[listKey];
+          historyEntry.purchases.push({
+            ...item,
+            totalPrice: totalSpent,
+            pricePerUnit,
+          });
+          historyEntry.total += totalSpent;
+    
+          state.history.totalSpent += totalSpent;
+    
+          shoppingList.items = shoppingList.items.filter((i) => i.name !== itemName);
         }
-      }, 
+      }
+    },
       
     clearList(state, action: PayloadAction<string>) {
       const list = state.shoppingLists.find((list) => list.key === action.payload);
@@ -139,13 +151,13 @@ const appSlice = createSlice({
     },
 
     clearHistoryList(state) {
-        state.history.items = [];
-        state.history.totalSpent = 0;
-        state.shoppingLists = [];
-
-        (async () => {
-            await clearAllDBStores();
-        })();
+      state.history.lists = {};
+      state.history.totalSpent = 0;
+      state.shoppingLists = [];
+    
+      (async () => {
+        await clearAllDBStores();
+      })();
     },
     
     loadFromDB(_state, action: PayloadAction<AppState>) {
@@ -157,28 +169,38 @@ const appSlice = createSlice({
 
     addToHistory(
       state: WritableDraft<AppState>,
-      action: PayloadAction<{ item: Item; totalPrice: number; pricePerUnit: number }>
-      ) {
-        const { item, totalPrice, pricePerUnit } = action.payload;
-        const normalizedItemName = item.name.toLowerCase();
-        const historyItem = state.history.items.find(
-            (h) => h.name.toLowerCase() === normalizedItemName
-        );
-        
-        if (historyItem) {
-            historyItem.totalPrice += totalPrice;
-            historyItem.popularity = (historyItem.popularity || 0) + 1;
-            historyItem.pricePerUnit = pricePerUnit;
-        } else {
-            state.history.items.push({
-            ...item,
-            totalPrice,
-            pricePerUnit,
-            popularity: 1,
-            });
-        }
-        state.history.totalSpent += totalPrice;
+      action: PayloadAction<{ listKey: string; item: Item; totalPrice: number; pricePerUnit: number }>
+    ) {
+      const { listKey, item, totalPrice, pricePerUnit } = action.payload;
+    
+      if (!state.history.lists[listKey]) {
+        return;
+      }
+    
+      const historyEntry = state.history.lists[listKey];
+      const normalizedItemName = item.name.toLowerCase();
+    
+      const historyItem = historyEntry.purchases.find(
+        (h) => h.name.toLowerCase() === normalizedItemName
+      );
+    
+      if (historyItem) {
+        historyItem.totalPrice += totalPrice;
+        historyItem.popularity = (historyItem.popularity || 0) + 1;
+        historyItem.pricePerUnit = pricePerUnit;
+      } else {
+        historyEntry.purchases.push({
+          ...item,
+          totalPrice,
+          pricePerUnit,
+          popularity: 1,
+        });
+      }
+    
+      historyEntry.total += totalPrice;
+      state.history.totalSpent += totalPrice;
     },
+    
 
     deleteList(state, action: PayloadAction<string>) {
       const listKey = action.payload;
@@ -229,31 +251,30 @@ const store = configureStore({
   reducer: appSlice.reducer,
 });
 
-// create var for history so we always load previous history version and not new
-let previousHistoryState = initialState.history;
 store.subscribe(() => {
   const state = store.getState();
+
   state.shoppingLists.forEach((list) => saveListToDB(list.key, list));
-  if (JSON.stringify(state.history) !== JSON.stringify(previousHistoryState)) {
-    saveHistoryToDB("history", state.history);
-    previousHistoryState = state.history;
-  } else {
-    console.log("history not saved here");
-  }
+
+  saveHistoryToDB("history", state.history);
 });
 
-// display only the top 5 recommendations based on popularity coefficient
+
 export const selectTopRecommendations = createSelector(
-  [(state: RootState) => state.history.items],
-  (historyItems) => {
+  [(state: RootState) => state.history.lists],
+  (historyLists) => {
     const popularityMap: Record<string, { name: string; popularity: number }> = {};
 
-    historyItems.forEach((item) => {
-      const normalizedName = item.name.toLowerCase();
-      if (!popularityMap[normalizedName]) {
-        popularityMap[normalizedName] = { name: item.name, popularity: 0 };
-      }
-      popularityMap[normalizedName].popularity += item.popularity || 0;
+    Object.values(historyLists).forEach((list) => {
+      list.purchases.forEach((item) => {
+        const normalizedName = item.name.toLowerCase();
+
+        if (!popularityMap[normalizedName]) {
+          popularityMap[normalizedName] = { name: item.name, popularity: 0 };
+        }
+
+        popularityMap[normalizedName].popularity += item.popularity || 0;
+      });
     });
 
     return Object.values(popularityMap)
@@ -261,6 +282,7 @@ export const selectTopRecommendations = createSelector(
       .slice(0, 5);
   }
 );
+
   
 (async () => {
   const dbKeys = (await getListFromDB("")) || [];
@@ -272,15 +294,15 @@ export const selectTopRecommendations = createSelector(
   }
 
   const history = await getHistoryFromDB();
-  
+
   store.dispatch(
     loadFromDB({
       shoppingLists,
-      history: history && history.items && history.totalSpent !== undefined
-        ? history
-        : initialState.history,
-    }));
-  })();
+      history: history?.value || initialState.history,
+    })
+  );
+})();
+
 
 export default store;
 export type RootState = ReturnType<typeof store.getState>;

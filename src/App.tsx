@@ -4,12 +4,11 @@ import ShoppingLists from "./pages/ShoppingLists";
 import History from "./pages/History";
 import ListItems from "./pages/ListItems";
 import { useState } from "react";
-import { AppBar, Toolbar, Typography, Tabs, Tab, Box, Button, Dialog, DialogTitle, TextField, DialogContent, DialogActions, DialogContentText } from "@mui/material";
+import { AppBar, Toolbar, Typography, Tabs, Tab, Box, Button, Dialog, DialogTitle, TextField, DialogContent, DialogActions, IconButton } from "@mui/material";
 import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
-import { AppDispatch, clearHistoryList, createList } from "./store/store";
+import { AppDispatch, createList } from "./store/store";
 import { useDispatch } from "react-redux";
-import { saveListToDB } from "./db";
-import RubbishBinIcon from "./assets/rubbish-bin.svg";
+import { saveHistoryToDB, saveListToDB } from "./db";
 
 // page for our navigation and header
 
@@ -20,111 +19,82 @@ const App: React.FC = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  // clear all data after confirming
-  const handleClearHistory = () => {
-    dispatch(clearHistoryList());
-    setConfirmOpen(false); 
-  };
-
-  const handleOpenConfirm = () => {
-    setConfirmOpen(true); 
-  };
 
   return (
-    <Box className="app-container" sx={{ minHeight: "100vh", backgroundColor: "rgb(221, 230, 220)" }}>
-      {/* header */}
-      <AppBar position="sticky" sx={{ backgroundColor: "rgb(148, 181, 145)" }}>
+    <Box className="app-container" sx={{
+      minHeight: "100vh",
+      backgroundColor: "#E6F4EA",
+      padding: "2rem",
+    }}>
+      <AppBar position="sticky" sx={{ backgroundColor: "#0046A1" }}>
         <Toolbar>
-          <Typography variant="h5" sx={{ flexGrow: 1, fontWeight: "bold" }}>
+          <Typography
+            variant="h5"
+            sx={{
+              flexGrow: 1,
+              fontWeight: "bold",
+              color: "#FFFFFF",
+            }}
+          >
             Список Покупок
           </Typography>
-          <Tabs 
-          value={currentTab}
-          textColor="inherit"
-          indicatorColor="primary"
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{
-            maxWidth: "100%", 
-            overflowX: "auto",
-          }}
+          <Tabs
+            value={currentTab}
+            textColor="inherit"
+            indicatorColor="secondary"
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              "& .MuiTab-root": {
+                fontWeight: "bold",
+                color: "#FFFFFF",
+                "&.Mui-selected": {
+                  color: "#94b591",
+                },
+              },
+            }}
           >
-              <Button
-                color="inherit"
-                onClick={() => setIsDialogOpen(true)}
-                sx={{
-                }}
-              >
-                <AddIcon />
-              </Button>
-              <Tab
-                label="Списки"
-                value="/lists"
-                component={Link}
-                to="/lists"
-                sx={{ fontWeight: "bold" }}
-              />
-              <Tab
-                label="История покупок"
-                value="/history"
-                component={Link}
-                to="/history"
-                sx={{ fontWeight: "bold" }}
-              />
-              <Button onClick={handleOpenConfirm}>
-                <img src={RubbishBinIcon} style={{ width: '18px', height: '18px' }} />
-              </Button>
-          </Tabs>
-        </Toolbar>
-
-        {/* dialog box for clearing all history */}
-        <Dialog
-          open={confirmOpen}
-          onClose={() => setConfirmOpen(false)}
-        >
-          <DialogTitle sx={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "5px",
-              width: "100%",
-            }}>
-              Очистить Историю
-          </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Это очистит всю историю. Вы уверены, что хотите продолжить?
-              </DialogContentText>
-            </DialogContent>
-          
-          <DialogActions>
-            <Box
+            <Tab
+              label="Списки"
+              value="/lists"
+              component={Link}
+              to="/lists"
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "5px",
-                width: "100%",
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "18px",
               }}
-            >
-              <Button
-                onClick={handleClearHistory}
-                variant="contained"
-                color="primary"
-              >
-                Удалить
-              </Button>
-              <Button
-                onClick={() => setConfirmOpen(false)}
-                variant="contained"
-                color="error"
-              >
-                Отменить
-              </Button>
-            </Box>
-          </DialogActions>
-        </Dialog>
+            />
+            <Tab
+              label="История покупок"
+              value="/history"
+              component={Link}
+              to="/history"
+              sx={{
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "18px",
+              }}
+            />
+          </Tabs>
+          <IconButton
+            color="inherit"
+            onClick={() => setIsDialogOpen(true)}
+            sx={{
+              marginLeft: "1rem",
+              backgroundColor: "#94b591",
+              color: "#FFFFFF",
+              borderRadius: "50%",
+              "&:hover": {
+                backgroundColor: "#7ca577",
+              },
+            }}
+          >
+            <AddIcon />
+          </IconButton>
+        </Toolbar>
       </AppBar>
+
 
       {/* routing/navigation */}
       <Box sx={{ padding: "2rem" }}>
@@ -137,19 +107,31 @@ const App: React.FC = () => {
         </Routes>
       </Box>
 
-      {/* option for adding a new list from the nav bar */}
-      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+      <Dialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "12px",
+            backgroundColor: "#F8F9FA",
+            padding: "20px",
+          },
+        }}
+      >
         <DialogTitle>
-          <Typography align="center" variant="h6" component="h2">
+          <Typography
+            align="center"
+            variant="h6"
+            component="h2"
+            sx={{
+              fontWeight: "600",
+              color: "#0046A1",
+            }}
+          >
             Добавить новый список
           </Typography>
         </DialogTitle>
-        <DialogContent
-          sx={{
-            overflowY: "visible",
-            position: "relative",
-          }}
-        >
+        <DialogContent>
           <TextField
             fullWidth
             variant="outlined"
@@ -158,7 +140,9 @@ const App: React.FC = () => {
             label="Название списка"
             placeholder="Введите название"
             sx={{
+              backgroundColor: "#FFFFFF",
               "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
                 "& fieldset": {
                   borderColor: "#94b591",
                 },
@@ -183,7 +167,7 @@ const App: React.FC = () => {
             sx={{
               display: "flex",
               justifyContent: "center",
-              gap: "5px",
+              gap: "10px",
               width: "100%",
             }}
           >
@@ -195,32 +179,61 @@ const App: React.FC = () => {
                 }
 
                 const listKey = `list-${Date.now()}`;
-                dispatch(createList({ key: listKey, name: listName}));
+                dispatch(
+                  createList({
+                    key: listKey,
+                    name: listName,
+                  })
+                );
                 saveListToDB(listKey, {
                   key: listKey,
-                  name: listName, 
+                  name: listName,
                   items: [],
                   total: 0,
-                })
+                });
+                saveHistoryToDB("history", {
+                  lists: {
+                    [listKey]: {
+                      listKey,
+                      listName,
+                      purchases: [],
+                      total: 0,
+                    },
+                  },
+                  totalSpent: 0,
+                });
 
                 setListName("");
                 setIsDialogOpen(false);
               }}
               variant="contained"
-              color="success"
+              sx={{
+                backgroundColor: "#7ca577",
+                color: "#FFFFFF",
+                "&:hover": {
+                  backgroundColor: "#5d8c4f",
+                },
+              }}
             >
               Добавить
             </Button>
             <Button
               onClick={() => setIsDialogOpen(false)}
               variant="contained"
-              color="error"
+              sx={{
+                backgroundColor: "#E57373",
+                color: "#FFFFFF",
+                "&:hover": {
+                  backgroundColor: "#C62828",
+                },
+              }}
             >
               Отменить
             </Button>
           </Box>
         </DialogActions>
       </Dialog>
+
     </Box>
   );
 };

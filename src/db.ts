@@ -1,8 +1,9 @@
 import { openDB } from "idb";
+import {AppState} from "./store/store";
 
 // interaction with our indexedDB
 
-const dbPromise = openDB('shoppingListDB', 2, {
+const dbPromise = openDB('shoppingListDB', 3, {
     upgrade(db) {
         if (!db.objectStoreNames.contains("shoppingLists")) {
             db.createObjectStore("shoppingLists", { keyPath: "key" });
@@ -38,32 +39,38 @@ export const getListFromDB = async (key: string) => {
     }
 };
 
-export const saveHistoryToDB = async (key: string, value: unknown) => {
+export const saveHistoryToDB = async (key: string, newHistory: AppState["history"]) => {
     const db = await dbPromise;
     try {
-        await db.put("history", { key, value });
+      const existingHistory = await db.get("history", key);
+      const mergedHistory = existingHistory
+        ? {
+            ...existingHistory.value,
+            lists: {
+              ...existingHistory.value.lists,
+              ...newHistory.lists,
+            },
+            totalSpent: newHistory.totalSpent,
+          }
+        : newHistory;
+  
+      await db.put("history", { key, value: mergedHistory });
     } catch (error) {
-        console.error("error saving history:", error);
+      console.error("Error saving history:", error);
     }
-};
+  };
 
 export const getHistoryFromDB = async () => {
-  const db = await dbPromise;
-  try {
-    const tx = db.transaction("history", "readonly");
-    const store = tx.objectStore("history");
-
-    let latestEntry = null;
-    let cursor = await store.openCursor(null, "prev");
-    if (cursor) {
-      latestEntry = cursor.value.value;
+    const db = await dbPromise;
+    try {
+      const historyEntry = await db.get("history", "history"); 
+      return historyEntry || null;
+    } catch (error) {
+      console.error("Error getting history from DB:", error);
+      return null;
     }
-    return latestEntry || null;
-  } catch (error) {
-    console.error("error getting last history:", error);
-    return null;
-  }
-};
+  };
+  
 
 export const deleteListFromDB = async (key: string): Promise<void> => {
     const db = await dbPromise;

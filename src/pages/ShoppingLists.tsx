@@ -23,7 +23,6 @@ import {
 } from "../store/store";
 import { 
   getListFromDB, 
-  saveListToDB 
 } from "../db";
 import Grid from '@mui/material/Grid2';
 import AddIcon from '@mui/icons-material/Add';
@@ -55,25 +54,21 @@ const ShoppingLists: React.FC = () => {
       return;
     }
 
-    // call reducer to create the list and save it to DB
-    // unique key based on the current date and time
     const listKey = `list-${Date.now()}`;
+
+    // creates list on the page and entry in shoppingLists
     dispatch(createList({ key: listKey, name: listName }));
-
-    saveListToDB(listKey, {
-      key: listKey,
-      name: listName,
-      items: [],
-      total: 0,
-    });
-
     setListName("");
     setIsDialogOpen(false);
   };
-
+  
   return (
     <div style={{ padding: "2rem" }}>
-      <Typography variant="h5" align="center" sx={{marginBottom: "2%"}}>
+      <Typography variant="h5" align="center" sx={{
+        marginBottom: "2%",
+        fontWeight: "600",
+        color: "#0046A1",
+      }}>
         Списки покупок
       </Typography>
       <Grid
@@ -93,9 +88,10 @@ const ShoppingLists: React.FC = () => {
                 sx={{
                   textTransform: "none",
                   fontWeight: "bold",
-                  width: "200px",
-                  borderColor: " #263f24",
-                  color: " #263f24",
+                  width: "250px",
+                  borderColor: "#94b591",
+                  color: "#0046A1",
+                  borderRadius: "8px",
                   "&:hover": {
                     borderColor: "#7ca577",
                     backgroundColor: "rgba(148, 181, 145, 0.1)",
@@ -123,32 +119,51 @@ const ShoppingLists: React.FC = () => {
         justifyContent="center"
         sx={{ marginTop: "20px" }}
       >
-        <Button
-          variant="outlined"
-          onClick={() => setIsDialogOpen(true)}
-          sx={{
-            borderColor: " #263f24",
-            color: "#263f24",
-            textTransform: "none",
-            fontWeight: "bold",
-            "&:hover": {
-              borderColor: "#7ca577",
-              backgroundColor: "rgba(148, 181, 145, 0.1)",
-            },
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "5px",
-          }}
-        >
-          <AddIcon />
-        </Button>
+          <Button
+            variant="outlined"
+            onClick={() => setIsDialogOpen(true)}
+            sx={{
+              borderColor: "#94b591",
+              color: "#0046A1",
+              textTransform: "none",
+              fontWeight: "bold",
+              borderRadius: "8px",
+              "&:hover": {
+                borderColor: "#7ca577",
+                backgroundColor: "rgba(148, 181, 145, 0.1)",
+              },
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "5px",
+            }}
+          >
+            <AddIcon />
+          </Button>
       </Grid>
 
       {/* dialog for creating new list */}
-      <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+      <Dialog 
+        open={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)}
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "12px",
+            backgroundColor: "#F8F9FA",
+            padding: "20px",
+          },
+        }}
+      >
         <DialogTitle>
-          <Typography align="center" variant="h6" component="h2">
+          <Typography
+            align="center"
+            variant="h6"
+            component="h2"
+            sx={{
+              fontWeight: "600", 
+              color: "#0046A1",
+            }}
+          >
             Добавить новый список
           </Typography>
         </DialogTitle>
@@ -161,6 +176,8 @@ const ShoppingLists: React.FC = () => {
             label="Название списка"
             placeholder="Введите название"
             sx={{
+              backgroundColor: "#FAFAFA",
+              borderRadius: "8px",
               "& .MuiOutlinedInput-root": {
                 "& fieldset": {
                   borderColor: "#94b591",
@@ -183,20 +200,36 @@ const ShoppingLists: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Box
-          sx={{
-            display: "flex",
-              justifyContent: "center", 
-              gap: "5px",
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "10px",
               width: "100%",
-          }}
+            }}
           >
-            <Button onClick={handleCreateList} variant="contained" color="success">
+            <Button
+              onClick={handleCreateList}
+              variant="contained"
+              sx={{
+                backgroundColor: "#7ca577", 
+                "&:hover": {
+                  backgroundColor: "#5d8c4f",
+                },
+                color: "#FFFFFF",
+              }}
+            >
               Добавить
             </Button>
             <Button
               onClick={() => setIsDialogOpen(false)}
               variant="contained"
-              color="error"
+              sx={{
+                backgroundColor: "#E57373",
+                "&:hover": {
+                  backgroundColor: "#C62828",
+                },
+                color: "#FFFFFF",
+              }}
             >
               Отменить
             </Button>
