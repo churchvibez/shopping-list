@@ -600,7 +600,7 @@ const ListItems: React.FC = () => {
         )}
       </List>
 
-      {/* Add Item Button */}
+      {/* add item button */}
       <Grid container justifyContent="center" sx={{ marginTop: "20px" }}>
         <Button
           variant="contained"

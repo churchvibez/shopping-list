@@ -4,13 +4,58 @@ import ShoppingLists from "./pages/ShoppingLists";
 import History from "./pages/History";
 import ListItems from "./pages/ListItems";
 import { useState } from "react";
-import { AppBar, Toolbar, Typography, Tabs, Tab, Box, Button, Dialog, DialogTitle, TextField, DialogContent, DialogActions, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Typography, Tabs, Tab, Box, Button, Dialog, DialogTitle, TextField, DialogContent, DialogActions, TextFieldProps, styled, alpha, InputAdornment, IconButton, Autocomplete } from "@mui/material";
 import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { AppDispatch, createList } from "./store/store";
 import { useDispatch } from "react-redux";
 import { saveHistoryToDB, saveListToDB } from "./db";
+import ClearIcon from '@mui/icons-material/Clear';
 
 // page for our navigation and header
+
+const CustomTextField = styled((props: TextFieldProps) => (
+  <TextField
+    {...props}
+    variant="filled" 
+  />
+))(({ theme }) => ({
+  "& .MuiFilledInput-root": {
+    overflow: "hidden",
+    borderRadius: 4,
+    border: "1px solid #E0E3E7", 
+    backgroundColor: "#FFFFFF",
+    transition: theme.transitions.create(["border-color", "background-color", "box-shadow"]),
+    height: "52px",
+    boxShadow: "none", 
+    "&:before, &:after": {
+      display: "none !important", 
+    },
+    "& input": {
+      paddingTop: "14px",
+      paddingBottom: "12px",
+      lineHeight: "20px",
+    },
+    "&:hover": {
+      borderColor: "#B2BAC2",
+    },
+    "&.Mui-focused": {
+      borderColor: "#3C5099",
+      boxShadow: `${alpha("#3C5099", 0.25)} 0 0 0 2px`, 
+      "&:before, &:after": {
+        display: "none !important",
+      },
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "#A6B2C3",
+    transform: "translate(14px, 14px)",
+    transition: "transform 0.2s ease-in-out",
+  },
+  "& .MuiInputLabel-shrink": {
+    transform: "translate(14px, 6px)",
+    fontSize: "14px",
+  },
+}));
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -19,20 +64,19 @@ const App: React.FC = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
   return (
     <Box className="app-container" sx={{
       minHeight: "100vh",
-      backgroundColor: "#E6F4EA",
-      padding: "2rem",
+      backgroundColor: "#FFFFFF",
     }}>
-      <AppBar position="sticky" sx={{ backgroundColor: "#0046A1" }}>
+      <AppBar position="sticky" sx={{ backgroundColor: "#3C5099" }}>
         <Toolbar>
           <Typography
             variant="h5"
             sx={{
               flexGrow: 1,
-              fontWeight: "bold",
               color: "#FFFFFF",
             }}
           >
@@ -41,15 +85,17 @@ const App: React.FC = () => {
           <Tabs
             value={currentTab}
             textColor="inherit"
-            indicatorColor="secondary"
             variant="scrollable"
             scrollButtons="auto"
             sx={{
-              "& .MuiTab-root": {
+                "& .MuiTabs-indicator": {
+                  display: "none",
+                },
+                "& .MuiTab-root": {
                 fontWeight: "bold",
                 color: "#FFFFFF",
                 "&.Mui-selected": {
-                  color: "#94b591",
+                  color: "#ffffff",
                 },
               },
             }}
@@ -61,7 +107,6 @@ const App: React.FC = () => {
               to="/lists"
               sx={{
                 textTransform: "none",
-                fontWeight: "bold",
                 fontSize: "18px",
               }}
             />
@@ -72,30 +117,46 @@ const App: React.FC = () => {
               to="/history"
               sx={{
                 textTransform: "none",
-                fontWeight: "bold",
                 fontSize: "18px",
               }}
             />
           </Tabs>
-          <IconButton
-            color="inherit"
-            onClick={() => setIsDialogOpen(true)}
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setInputValue("");
+              setListName(""); 
+              setIsDialogOpen(true)}}
             sx={{
-              marginLeft: "1rem",
-              backgroundColor: "#94b591",
-              color: "#FFFFFF",
-              borderRadius: "50%",
+              color: "#3C5099",
+              border: "1.5px solid #3C5099", 
+              backgroundColor: "#FFFFFF",
+              fontWeight: "bold",
+              textTransform: "none",
+              borderRadius: "8px",
+              padding: "6px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              transition: "all 0.2s ease-in-out",
               "&:hover": {
-                backgroundColor: "#7ca577",
+                backgroundColor: "#F0F4FF",
+                borderColor: "#3C5099",
+              },
+              "&:active": {
+                backgroundColor: "#E0E8FF",
+                borderColor: "#2A3D7F",
+              },
+              "&:focus-visible": {
+                outline: "2px solid #87A4FF",
+                outlineOffset: "2px",
               },
             }}
           >
-            <AddIcon />
-          </IconButton>
+            <AddIcon sx={{ fontSize: "18px", color: "#3C5099" }} /> Создать
+          </Button>
         </Toolbar>
       </AppBar>
-
-
       {/* routing/navigation */}
       <Box sx={{ padding: "2rem" }}>
         <Routes>
@@ -112,128 +173,171 @@ const App: React.FC = () => {
         onClose={() => setIsDialogOpen(false)}
         sx={{
           "& .MuiDialog-paper": {
-            borderRadius: "12px",
-            backgroundColor: "#F8F9FA",
+            borderRadius: "8px",
+            backgroundColor: "#FFFFFF",
             padding: "20px",
+            width: "400px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
           },
         }}
       >
-        <DialogTitle>
-          <Typography
-            align="center"
-            variant="h6"
-            component="h2"
+        {/* title and close button */}
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: "18px", 
+            fontWeight: "bold", 
+            padding: "12px 20px",
+          }}
+        >
+          Добавить новый список
+          <IconButton
+            onClick={() => setIsDialogOpen(false)}
             sx={{
-              fontWeight: "600",
-              color: "#0046A1",
+              color: "#A6A6A6", 
+              "&:hover": { color: "#3C3C3C" },
             }}
           >
-            Добавить новый список
-          </Typography>
+            <ClearIcon />
+          </IconButton>
         </DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            variant="outlined"
-            value={listName}
-            onChange={(e) => setListName(e.target.value)}
-            label="Название списка"
-            placeholder="Введите название"
-            sx={{
-              backgroundColor: "#FFFFFF",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-                "& fieldset": {
-                  borderColor: "#94b591",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#7ca577",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#5d8c4f",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#94b591",
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#5d8c4f",
-              },
+
+        {/* content (input field) */}
+        <DialogContent sx={{ padding: "8px 20px" }}>
+          <Autocomplete
+            freeSolo
+            options={[]}
+            inputValue={inputValue}
+            onInputChange={(_, newValue) => {
+              setInputValue(newValue);
+              setListName(newValue);
             }}
+            disableClearable={true}
+            renderInput={(params) => (
+              <CustomTextField
+                {...params}
+                label="Наименование"
+                variant="filled"
+                style={{ marginTop: 8 }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: inputValue ? (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => {
+                          setInputValue("");
+                          setListName("");
+                        }}
+                        edge="end"
+                        aria-label="clear input"
+                        sx={{ padding: 0, marginRight: "4px" }}
+                      >
+                        <ClearIcon sx={{ color: "#A6B2C3", fontSize: 18 }} />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null,
+                }}
+              />
+            )}
           />
         </DialogContent>
-        <DialogActions>
-          <Box
+
+        {/* action buttons (bottom right) */}
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            padding: "12px 20px",
+          }}
+        >
+          <Button
+            onClick={() => setIsDialogOpen(false)}
+            variant="outlined"
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "10px",
-              width: "100%",
+              borderColor: "#C3C6CE",
+              color: "#3C5099",
+              backgroundColor: "#FFFFFF",
+              textTransform: "none",
+              borderRadius: "6px",
+              fontWeight: "bold",
+              padding: "6px 16px",
+              fontSize: "14px",
+              "&:hover": {
+              backgroundColor: "#F0F4FF",
+              borderColor: "#3C5099",
+          },
+          "&:active": {
+          backgroundColor: "#E0E8FF",
+          borderColor: "#2A3D7F",
+          },
+          "&:focus-visible": {
+          outline: "2px solid #87A4FF",
+          outlineOffset: "2px",
+          },
             }}
           >
-            <Button
-              onClick={() => {
-                if (listName.trim() === "") {
-                  console.warn("list name is empty");
-                  return;
-                }
+            Отменить
+          </Button>
 
-                const listKey = `list-${Date.now()}`;
-                dispatch(
-                  createList({
-                    key: listKey,
-                    name: listName,
-                  })
-                );
-                saveListToDB(listKey, {
+          <Button
+            onClick={() => {
+              if (listName.trim() === "") {
+                console.warn("list name is empty");
+                return;
+              }
+
+              const listKey = `list-${Date.now()}`;
+              dispatch(
+                createList({
                   key: listKey,
                   name: listName,
-                  items: [],
-                  total: 0,
-                });
-                saveHistoryToDB("history", {
-                  lists: {
-                    [listKey]: {
-                      listKey,
-                      listName,
-                      purchases: [],
-                      total: 0,
-                    },
+                })
+              );
+              saveListToDB(listKey, {
+                key: listKey,
+                name: listName,
+                items: [],
+                total: 0,
+              });
+              saveHistoryToDB("history", {
+                lists: {
+                  [listKey]: {
+                    listKey,
+                    listName,
+                    purchases: [],
+                    total: 0,
                   },
-                  totalSpent: 0,
-                });
+                },
+                totalSpent: 0,
+              });
 
-                setListName("");
-                setIsDialogOpen(false);
-              }}
-              variant="contained"
-              sx={{
-                backgroundColor: "#7ca577",
-                color: "#FFFFFF",
-                "&:hover": {
-                  backgroundColor: "#5d8c4f",
-                },
-              }}
-            >
-              Добавить
-            </Button>
-            <Button
-              onClick={() => setIsDialogOpen(false)}
-              variant="contained"
-              sx={{
-                backgroundColor: "#E57373",
-                color: "#FFFFFF",
-                "&:hover": {
-                  backgroundColor: "#C62828",
-                },
-              }}
-            >
-              Отменить
-            </Button>
-          </Box>
+              setListName("");
+              setIsDialogOpen(false);
+            }}
+            variant="contained"
+            sx={{
+              backgroundColor: "#3C5099",
+              color: "#FFFFFF",
+              textTransform: "none",
+              borderRadius: "6px",
+              fontWeight: "bold",
+              padding: "6px 16px",
+              fontSize: "14px",
+              marginLeft: "8px",
+              "&:hover": {
+                backgroundColor: "#2F3E77",
+              },
+              "&:active": {
+                backgroundColor: "#1E2A5E",
+              },
+            }}
+          >
+            Создать
+          </Button>
         </DialogActions>
       </Dialog>
-
     </Box>
   );
 };
