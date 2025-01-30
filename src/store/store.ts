@@ -259,7 +259,6 @@ store.subscribe(() => {
   saveHistoryToDB("history", state.history);
 });
 
-
 export const selectTopRecommendations = createSelector(
   [(state: RootState) => state.history.lists],
   (historyLists) => {
@@ -283,7 +282,6 @@ export const selectTopRecommendations = createSelector(
   }
 );
 
-  
 (async () => {
   const dbKeys = (await getListFromDB("")) || [];
   const shoppingLists = [];
@@ -302,7 +300,6 @@ export const selectTopRecommendations = createSelector(
     })
   );
 })();
-
 
 export default store;
 export type RootState = ReturnType<typeof store.getState>;

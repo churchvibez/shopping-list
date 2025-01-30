@@ -9,7 +9,12 @@ import {
   Typography,
   IconButton,
   Paper,
-  TextField
+  TextField,
+  styled,
+  alpha,
+  Autocomplete,
+  TextFieldProps,
+  InputAdornment
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, createList, deleteList, RootState } from "../store/store";
@@ -17,6 +22,56 @@ import { getListFromDB } from "../db";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { useNavigate } from "react-router-dom";
+import ClearIcon from '@mui/icons-material/Clear';
+
+const CustomTextField = styled((props: TextFieldProps) => (
+  <TextField
+    {...props}
+    variant="filled" 
+  />
+))(({ theme }) => ({
+  "& .MuiFilledInput-root": {
+    overflow: "hidden",
+    borderRadius: 4,
+    border: "1px solid #E0E3E7", 
+    backgroundColor: "#FFFFFF",
+    transition: theme.transitions.create(["border-color", "background-color", "box-shadow"]),
+    height: "52px",
+    boxShadow: "none", 
+    "&:before, &:after": {
+      display: "none !important", 
+    },
+    "& input": {
+      paddingTop: "14px",
+      paddingBottom: "12px",
+      lineHeight: "20px",
+    },
+    "&:hover": {
+      borderColor: "#B2BAC2",
+    },
+    "&.Mui-focused": {
+      borderColor: "#3C5099",
+      boxShadow: `${alpha("#3C5099", 0.25)} 0 0 0 2px`,
+      "&:before, &:after": {
+        display: "none !important",
+      },
+    },
+    "&.Mui-error": {
+      borderColor: "#D32F2F",
+    },
+  },
+
+  "& .MuiInputLabel-root": {
+    color: "#A6B2C3", 
+    transform: "translate(14px, 14px)",
+    transition: "transform 0.2s ease-in-out",
+  },
+  "& .MuiInputLabel-shrink": {
+    transform: "translate(14px, 6px)",
+    fontSize: "14px",
+    color: "#A6B2C3 !important",
+  },
+}));
 
 const ShoppingLists: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +79,9 @@ const ShoppingLists: React.FC = () => {
   const lists = useSelector((state: RootState) => state.shoppingLists);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
+  const [inputValue, setInputValue] = useState("");
+  const [listNameError, setListNameError] = useState(false);
+
 
   // fetch lists from IndexedDB
   useEffect(() => {
@@ -40,13 +98,16 @@ const ShoppingLists: React.FC = () => {
   // create new list
   const handleCreateList = () => {
     if (listName.trim() === "") {
-      console.warn("List name is empty");
+      setListNameError(true);
+      console.warn("list name is empty");
       return;
     }
 
     const listKey = `list-${Date.now()}`;
     dispatch(createList({ key: listKey, name: listName }));
     setListName("");
+    setInputValue("");
+    setListNameError(false); 
     setIsDialogOpen(false);
   };
 
@@ -71,19 +132,21 @@ const ShoppingLists: React.FC = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "14px 36px",
-              boxShadow: "none",
+              padding: "8px 25px",
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
               border: "1px solid #E0E3E7",
               backgroundColor: "#FFFFFF",
-              transition: "background 0.2s ease",
+              transition: "all 0.2s ease-in-out",
+              borderRadius: "0px",
               "&:hover": {
-                backgroundColor: "#F8F9FA",
+                backgroundColor: "#F8F9FC",
+                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.15)", 
               },
               cursor: "pointer",
             }}
             onClick={() => navigate(`/list/${list.key}`)}
           >
-            <Typography sx={{ fontWeight: "600", color: "#000000" }}>
+            <Typography sx={{ fontWeight: "600", color: "#0B1F33", fontSize: "16px" }}>
               {list.name}
             </Typography>
 
@@ -94,7 +157,7 @@ const ShoppingLists: React.FC = () => {
                 dispatch(deleteList(list.key));
               }}
               sx={{
-                borderColor: "#C3C6CE",
+                borderColor: "#D32F2F",
                 color: "#D32F2F",
                 textTransform: "none",
                 fontWeight: "bold",
@@ -114,7 +177,6 @@ const ShoppingLists: React.FC = () => {
             >
               <DeleteOutlinedIcon sx={{ fontSize: 18 }} /> Удалить
             </Button>
-
           </Paper>
         ))}
       </Box>
@@ -122,7 +184,11 @@ const ShoppingLists: React.FC = () => {
       <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
         <Button
           variant="contained"
-          onClick={() => setIsDialogOpen(true)}
+          onClick={() => {
+            setInputValue("");
+            setListName(""); 
+            setIsDialogOpen(true)
+          }}
           sx={{
             backgroundColor: "#3C5099",
             color: "#FFFFFF",
@@ -144,7 +210,10 @@ const ShoppingLists: React.FC = () => {
 
       <Dialog
         open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setListNameError(false);
+        }}
         sx={{
           "& .MuiDialog-paper": {
             borderRadius: "8px",
@@ -167,45 +236,59 @@ const ShoppingLists: React.FC = () => {
         >
           Добавить новый список
           <IconButton
-            onClick={() => setIsDialogOpen(false)}
+            onClick={() => {
+              setIsDialogOpen(false)
+              setListNameError(false); 
+            }}
             sx={{
               color: "#A6A6A6",
               "&:hover": { color: "#3C3C3C" },
             }}
           >
-            <AddIcon />
+            <ClearIcon />
           </IconButton>
         </DialogTitle>
 
         <DialogContent sx={{ padding: "8px 20px" }}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            value={listName}
-            onChange={(e) => setListName(e.target.value)}
-            label="Название списка"
-            placeholder="Введите название"
-            sx={{
-              backgroundColor: "#FAFAFA",
-              borderRadius: "6px",
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: "#E0E3E7",
-                },
-                "&:hover fieldset": {
-                  borderColor: "#B2BAC2",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#3C5099",
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: "#A6B2C3",
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#3C5099",
-              },
+          <Autocomplete
+            freeSolo
+            options={[]} 
+            inputValue={inputValue}
+            onInputChange={(_, newValue) => {
+              setInputValue(newValue);
+              setListName(newValue);
+              setListNameError(false);
             }}
+            disableClearable={true}
+            renderInput={(params) => (
+              <CustomTextField
+                {...params}
+                label="Название списка"
+                variant="filled"
+                error={listNameError}
+                helperText={listNameError ? "Введите название списка" : ""} 
+                style={{ marginTop: 8 }}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: inputValue ? (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => {
+                          setInputValue("");
+                          setListName("");
+                          setListNameError(false);
+                        }}
+                        edge="end"
+                        aria-label="clear input"
+                        sx={{ padding: 0, marginRight: "4px" }}
+                      >
+                        <ClearIcon sx={{ color: "#A6B2C3", fontSize: 18 }} />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null,
+                }}
+              />
+            )}
           />
         </DialogContent>
 
@@ -217,7 +300,10 @@ const ShoppingLists: React.FC = () => {
           }}
         >
           <Button
-            onClick={() => setIsDialogOpen(false)}
+            onClick={() => {
+              setIsDialogOpen(false)
+              setListNameError(false); 
+            }}
             variant="outlined"
             sx={{
               borderColor: "#C3C6CE",

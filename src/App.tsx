@@ -8,7 +8,6 @@ import { AppBar, Toolbar, Typography, Tabs, Tab, Box, Button, Dialog, DialogTitl
 import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { AppDispatch, createList } from "./store/store";
 import { useDispatch } from "react-redux";
-import { saveHistoryToDB, saveListToDB } from "./db";
 import ClearIcon from '@mui/icons-material/Clear';
 
 // page for our navigation and header
@@ -39,21 +38,26 @@ const CustomTextField = styled((props: TextFieldProps) => (
       borderColor: "#B2BAC2",
     },
     "&.Mui-focused": {
-      borderColor: "#3C5099",
-      boxShadow: `${alpha("#3C5099", 0.25)} 0 0 0 2px`, 
+      borderColor: "#3C5099", 
+      boxShadow: `${alpha("#3C5099", 0.25)} 0 0 0 2px`,
       "&:before, &:after": {
         display: "none !important",
       },
     },
+    "&.Mui-error": {
+      borderColor: "#D32F2F",
+    },
   },
+
   "& .MuiInputLabel-root": {
-    color: "#A6B2C3",
+    color: "#A6B2C3", 
     transform: "translate(14px, 14px)",
     transition: "transform 0.2s ease-in-out",
   },
   "& .MuiInputLabel-shrink": {
     transform: "translate(14px, 6px)",
     fontSize: "14px",
+    color: "#A6B2C3 !important",
   },
 }));
 
@@ -65,6 +69,7 @@ const App: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [listName, setListName] = useState("");
   const [inputValue, setInputValue] = useState("");
+  const [listNameError, setListNameError] = useState(false);
 
   return (
     <Box className="app-container" sx={{
@@ -129,7 +134,6 @@ const App: React.FC = () => {
               setIsDialogOpen(true)}}
             sx={{
               color: "#3C5099",
-              border: "1.5px solid #3C5099", 
               backgroundColor: "#FFFFFF",
               fontWeight: "bold",
               textTransform: "none",
@@ -141,7 +145,6 @@ const App: React.FC = () => {
               transition: "all 0.2s ease-in-out",
               "&:hover": {
                 backgroundColor: "#F0F4FF",
-                borderColor: "#3C5099",
               },
               "&:active": {
                 backgroundColor: "#E0E8FF",
@@ -170,7 +173,10 @@ const App: React.FC = () => {
 
       <Dialog
         open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setListNameError(false);
+        }}
         sx={{
           "& .MuiDialog-paper": {
             borderRadius: "8px",
@@ -194,7 +200,10 @@ const App: React.FC = () => {
         >
           Добавить новый список
           <IconButton
-            onClick={() => setIsDialogOpen(false)}
+            onClick={() => {
+              setIsDialogOpen(false)
+              setListNameError(false); 
+            }}
             sx={{
               color: "#A6A6A6", 
               "&:hover": { color: "#3C3C3C" },
@@ -208,18 +217,21 @@ const App: React.FC = () => {
         <DialogContent sx={{ padding: "8px 20px" }}>
           <Autocomplete
             freeSolo
-            options={[]}
+            options={[]} 
             inputValue={inputValue}
             onInputChange={(_, newValue) => {
               setInputValue(newValue);
               setListName(newValue);
+              setListNameError(false); 
             }}
             disableClearable={true}
             renderInput={(params) => (
               <CustomTextField
                 {...params}
-                label="Наименование"
+                label="Название списка"
                 variant="filled"
+                error={listNameError} 
+                helperText={listNameError ? "Введите название списка" : ""} 
                 style={{ marginTop: 8 }}
                 InputProps={{
                   ...params.InputProps,
@@ -229,6 +241,7 @@ const App: React.FC = () => {
                         onClick={() => {
                           setInputValue("");
                           setListName("");
+                          setListNameError(false);
                         }}
                         edge="end"
                         aria-label="clear input"
@@ -253,7 +266,10 @@ const App: React.FC = () => {
           }}
         >
           <Button
-            onClick={() => setIsDialogOpen(false)}
+            onClick={() => {
+              setIsDialogOpen(false)
+              setListNameError(false); 
+            }}
             variant="outlined"
             sx={{
               borderColor: "#C3C6CE",
@@ -283,38 +299,18 @@ const App: React.FC = () => {
 
           <Button
             onClick={() => {
-              if (listName.trim() === "") {
-                console.warn("list name is empty");
-                return;
-              }
-
-              const listKey = `list-${Date.now()}`;
-              dispatch(
-                createList({
-                  key: listKey,
-                  name: listName,
-                })
-              );
-              saveListToDB(listKey, {
-                key: listKey,
-                name: listName,
-                items: [],
-                total: 0,
-              });
-              saveHistoryToDB("history", {
-                lists: {
-                  [listKey]: {
-                    listKey,
-                    listName,
-                    purchases: [],
-                    total: 0,
-                  },
-                },
-                totalSpent: 0,
-              });
-
-              setListName("");
-              setIsDialogOpen(false);
+                if (listName.trim() === "") {
+                  setListNameError(true);
+                  console.warn("list name is empty");
+                  return;
+                }
+            
+                const listKey = `list-${Date.now()}`;
+                dispatch(createList({ key: listKey, name: listName }));
+                setListName("");
+                setInputValue("");
+                setListNameError(false); 
+                setIsDialogOpen(false);
             }}
             variant="contained"
             sx={{

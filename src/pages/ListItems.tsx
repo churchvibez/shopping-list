@@ -32,10 +32,16 @@ import {
   Autocomplete,
   Box,
   ListItemButton,
+  styled,
+  TextFieldProps,
+  alpha,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import Grid from "@mui/material/Grid2";
+import ClearIcon from '@mui/icons-material/Clear';
 import "../styles/main.scss";
 
 // list of all suggested products in alphabetical order
@@ -135,6 +141,52 @@ const russianProducts = Array.from(
   ])
 );
 
+// custom text field for inputs
+const StyledTextField = styled((props: TextFieldProps) => (
+  <TextField
+    {...props}
+    variant="filled" 
+  />
+))(({ theme }) => ({
+  "& .MuiFilledInput-root": {
+    overflow: "hidden",
+    borderRadius: 4,
+    border: "1px solid #E0E3E7", 
+    backgroundColor: "#FFFFFF",
+    transition: theme.transitions.create(["border-color", "background-color", "box-shadow"]),
+    height: "52px",
+    boxShadow: "none", 
+    "&:before, &:after": {
+      display: "none !important", 
+    },
+    "& input": {
+      paddingTop: "14px",
+      paddingBottom: "12px",
+      lineHeight: "20px",
+    },
+    "&:hover": {
+      borderColor: "#B2BAC2",
+    },
+    "&.Mui-focused": {
+      borderColor: "#3C5099",
+      boxShadow: `${alpha("#3C5099", 0.25)} 0 0 0 2px`, 
+      "&:before, &:after": {
+        display: "none !important",
+      },
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "#A6B2C3",
+    transform: "translate(14px, 14px)",
+    transition: "transform 0.2s ease-in-out",
+  },
+  "& .MuiInputLabel-shrink": {
+    transform: "translate(14px, 6px)",
+    fontSize: "14px",
+  },
+}));
+
+
 const ListItems: React.FC = () => {
   const { key } = useParams<{ key: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -151,6 +203,7 @@ const ListItems: React.FC = () => {
   const [productError, setProductError] = useState(false);
   const [amountError, setAmountError] = useState(false);
   const [indicesError, setIndicesError] = useState(false);
+  const [priceError, setPriceError] = useState(false);
 
   const shoppingList = useSelector((state: RootState) =>
     state.shoppingLists.find((list) => list.key === key)
@@ -221,23 +274,22 @@ const ListItems: React.FC = () => {
   <div className="container-fluid page-container" style={{ maxWidth: "70%" }}>
     <div className="container mt-4" style={{ maxWidth: "600px", margin: "0 auto" }}>
       
-      <Box
-        sx={{
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          margin: "0",
-        }}
-      >
-        <Button
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        width: "100%",
+        maxWidth: "600px",
+        margin: "0 auto",
+        padding: "10px 0",
+        position: "relative",
+      }}
+    >
+      <Button
         startIcon={<ArrowBackIcon />}
         sx={{
-          position: "absolute",
-            top: "0",
-            left: "0",
-            margin: "10px",
+          position: "absolute", 
+          left: "-85px",
           backgroundColor: "transparent",
           color: "#3057D5",
           textTransform: "none",
@@ -248,240 +300,433 @@ const ListItems: React.FC = () => {
         Назад
       </Button>
 
-        <Typography
-          variant="h5"
-          sx={{
-            marginTop: "13px",
-            fontWeight: "bold",
-            color: "#0046a1",
-          }}
-        >
-          Список: {shoppingList?.name || "Список покупок"}
-        </Typography>
-      </Box>
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: "bold",
+          color: "#0046a1",
+          textAlign: "left",
+          marginLeft: "10px", 
+          flexGrow: 1,
+        }}
+      >
+        Список: {shoppingList?.name || "Список покупок"}
+      </Typography>
+    </Box>
 
-        {/* dialog to add a product */}
-        <Dialog
-          open={isPopupOpen}
-          onClose={togglePopup}
-          fullWidth
-          maxWidth="sm"
+    <Dialog
+      open={isPopupOpen}
+      onClose={() => {
+        togglePopup();
+      }}
+      fullWidth
+      maxWidth="sm"
+      sx={{
+        "& .MuiDialog-paper": {
+          width: "95%",
+          height: "500px",
+          paddingLeft: "10px",
+          borderRadius: "12px", 
+          backgroundColor: "#ffffff", 
+        },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: "18px",
+          fontWeight: "bold",
+          padding: "12px 20px",
+        }}
+      >
+        Добавить новый список
+        <IconButton
+          onClick={() => {
+            togglePopup();
+          }}
           sx={{
-            "& .MuiDialog-paper": {
-              width: "95%",
-              height: "500px",
-              borderRadius: "12px", 
-              padding: "20px",
-              backgroundColor: "#F8F9FA", 
-            },
+            color: "#A6A6A6",
+            "&:hover": { color: "#3C3C3C" },
           }}
         >
-          <DialogTitle>
-            <Typography align="center" variant="h6" component="h2" sx={{ fontWeight: 600, color: "#0046A1" }}>
-              Добавить продукт
-            </Typography>
-          </DialogTitle>
-          <DialogContent>
-            <Grid container spacing={4}>
+          <ClearIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <Grid container spacing={4}>
+          <Grid>
+            <Grid container direction="column" sx={{ marginTop: "7%", gap: "33px" }}>
+              
+            {/* product name */}
+            <Grid>
+              <Autocomplete
+                freeSolo
+                options={Array.from(
+                  new Set([
+                    ...recommendations.map((item) => item.name.toLowerCase()),
+                    ...russianProducts.map((product) => product.toLowerCase()),
+                  ])
+                )}
+                value={product}
+                onInputChange={(_, newValue) => {
+                  setProduct(newValue);
+                  setProductError(false);
+                }}
+                disableClearable={true}
+                renderInput={(params) => (
+                  <StyledTextField
+                    {...params}
+                    sx={{ width: "265px" }}
+                    label="Название продукта"
+                    variant="filled"
+                    error={productError}
+                    helperText={productError ? "Введите название продукта" : ""}
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: product ? (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setProduct("")}
+                            edge="end"
+                            aria-label="clear input"
+                            sx={{ padding: 0, marginRight: "4px" }}
+                          >
+                            <ClearIcon sx={{ color: "#A6B2C3", fontSize: 18 }} />
+                          </IconButton>
+                        </InputAdornment>
+                      ) : null,
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+              
+              {/* quantity */}
               <Grid>
-                <Grid container direction="column" sx={{ marginTop: "7%" }}>
-                  <Grid>
-                    <Autocomplete
-                      freeSolo
-                      options={Array.from(
-                        new Set([
-                          ...recommendations.map((item) => item.name.toLowerCase()),
-                          ...russianProducts.map((product) => product.toLowerCase()),
-                        ])
-                      )}
-                      value={product}
-                      onInputChange={(_, newValue) => setProduct(newValue)}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          variant="outlined"
-                          label="Название продукта"
-                          placeholder="Например: хлеб..."
-                          className="popup-input"
-                          error={productError}
-                          helperText={productError ? "Требуется": ""}
-                          sx={{
-                            backgroundColor: "#FAFAFA",
-                            borderRadius: "8px",
-                            padding: "10px",
-                          }}
-                        />
-                      )}
-                    />
-                  </Grid>
-                  
-                  {/* input field for product quantity */}
-                  <Grid>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      value={amount}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d*$/.test(value)) {
-                          setAmount(value);
-                        }
-                      }}
+                <Autocomplete
+                  freeSolo
+                  options={[]} 
+                  inputValue={amount}
+                  onInputChange={(_, newValue) => {
+                    if (/^\d*$/.test(newValue)) { 
+                      setAmount(newValue);
+                      setAmountError(false);
+                    }
+                  }}
+                  disableClearable={true}
+                  renderInput={(params) => (
+                    <StyledTextField
+                      {...params}
+                      sx={{ width: "265px" }}
+                      variant="filled"
                       label="Количество"
                       placeholder="Например: 3..."
-                      className="popup-input"
-                      error={amountError}
-                      helperText={amountError ? "Требуется": ""}
-                      sx={{
-                        backgroundColor: "#FAFAFA",
-                        borderRadius: "8px",
-                        padding: "10px",
+                      error={amountError} 
+                      helperText={amountError ? "Введите количество" : ""}
+                      InputProps={{
+                        endAdornment: amount ? (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setAmount("")}
+                              edge="end"
+                              aria-label="clear input"
+                              sx={{ padding: 0, marginRight: "4px" }}
+                            >
+                              <ClearIcon sx={{ color: "#A6B2C3", fontSize: 18 }} />
+                            </IconButton>
+                          </InputAdornment>
+                        ) : null,
                       }}
                     />
-                  </Grid>
-
-                  {/* input field for product measurements*/}
-                  <Grid>
-                    <Autocomplete
-                      freeSolo
-                      options={Object.keys(measurementUnits)}
-                      value={indices}
-                      onInputChange={(_, newValue) => {
-                        setIndices(measurementUnits[newValue] || newValue);
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          fullWidth
-                          variant="outlined"
-                          label="Единицы измерения"
-                          placeholder="Например: литры..."
-                          className="popup-input"
-                          error={indicesError}
-                          helperText={indicesError ? "Требуется" : ""}
-                          sx={{
-                            backgroundColor: "#FAFAFA",
-                            borderRadius: "8px",
-                            padding: "10px",
-                          }}
-                        />
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-                <DialogActions>
-                  <Box sx={{ display: "flex", flexDirection: "column", width: "100%", gap: "10px", padding: "10px" }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      onClick={handleAdd}
-                      sx={{ fontWeight: 600 }}
-                    >
-                      Добавить
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="error"
-                      fullWidth
-                      onClick={togglePopup}
-                      sx={{ fontWeight: 600 }}
-                    >
-                      Отменить
-                    </Button>
-                  </Box>
-                </DialogActions>
-
+                  )}
+                />
               </Grid>
-              {/* recommendations and items by alphabet */}
-              <Grid sx={{width: "220px"}}>
-                <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} centered>
-                  <Tab label="Рекомендации" />
-                  <Tab label="А-Я" />
-                </Tabs>
-                {activeTab === 0 && (
-                  <List sx={{ maxHeight: "300px", overflowY: "auto", backgroundColor: "#F1F3F5", borderRadius: "8px", padding: "5px" }}>
 
-                    {recommendations.map((item, index) => (
-                      <ListItemButton
-                        sx={{
-                          whiteSpace: "normal",
-                          overflowWrap: "break-word",
-                          wordBreak: "break-word",
-                        }}
-                        key={index}
-                        onClick={() => setProduct(item.name)}
-                      >
-                        <ListItemText 
-                          sx={{
-                            whiteSpace: "normal",
-                            overflowWrap: "break-word",
-                            wordBreak: "break-word",
-                          }}
-                        primary={`${item.name}`} />
-                      </ListItemButton>
-                    ))}
-                  </List>
-                )}
-                {activeTab === 1 && (
-                  <List sx={{ maxHeight: "300px", overflowY: "auto", backgroundColor: "#F1F3F5", borderRadius: "8px", padding: "5px" }}>
-
-                    {russianProducts.map((letter, index) => (
-                      <ListItemButton key={index} onClick={() => setProduct(letter)}>
-                        <ListItemText primary={letter} />
-                      </ListItemButton>
-                    ))}
-                  </List>
-                )}
+              {/* Measurement Units */}
+              <Grid>
+                <Autocomplete
+                  freeSolo
+                  options={Object.keys(measurementUnits)}
+                  value={indices}
+                  onInputChange={(_, newValue) => {
+                    setIndices(measurementUnits[newValue] || newValue);
+                    setIndicesError(false);
+                  }}
+                  disableClearable={true}
+                  renderInput={(params) => (
+                    <StyledTextField
+                      {...params}
+                      sx={{ width: "265px" }}
+                      label="Единицы измерения"
+                      variant="filled"
+                      error={indicesError}
+                      helperText={indicesError ? "Выберите единицы измерения" : ""}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: indices ? (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setIndices("")}
+                              edge="end"
+                              aria-label="clear input"
+                              sx={{ padding: 0, marginRight: "4px" }}
+                            >
+                              <ClearIcon sx={{ color: "#A6B2C3", fontSize: 18 }} />
+                            </IconButton>
+                          </InputAdornment>
+                        ) : null,
+                      }}
+                    />
+                  )}
+                />
               </Grid>
             </Grid>
-          </DialogContent>
-        </Dialog>
+          </Grid>
+          {/* recommendations and items by alphabet */}
+          <Grid sx={{ width: "200px", flexShrink: 0 }}>
+            <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} centered sx={{
+              "& .MuiTabs-flexContainer": {
+                paddingLeft: "20px",
+              },
+            }}>
+              <Tab label="Рекомендации" />
+              <Tab label="А-Я" />
+            </Tabs>
+            {activeTab === 0 && (
+              <List sx={{ maxHeight: "210px", overflowY: "auto", borderRadius: "8px", padding: "5px" }}>
+                {recommendations.map((item, index) => (
+                  <ListItemButton
+                    sx={{
+                      whiteSpace: "normal",
+                      overflowWrap: "break-word",
+                      wordBreak: "break-word"
+                    }}
+                    key={index}
+                    onClick={() => setProduct(item.name)}
+                  >
+                    <ListItemText 
+                      sx={{
+                        whiteSpace: "normal",
+                        overflowWrap: "break-word",
+                        wordBreak: "break-word",
+                      }}
+                    primary={`${item.name}`} />
+                  </ListItemButton>
+                ))}
+              </List>
+            )}
+            {activeTab === 1 && (
+              <List sx={{ maxHeight: "190px", overflowY: "auto", borderRadius: "8px", padding: "5px" }}>
 
-      {/* Items Not Purchased */}
+                {russianProducts.map((letter, index) => (
+                  <ListItemButton key={index} onClick={() => setProduct(letter)}>
+                    <ListItemText primary={letter} />
+                  </ListItemButton>
+                ))}
+              </List>
+            )}
+          </Grid>
+          {/* buttons at the bottom  */}
+          <Grid sx={{ display: "flex", justifyContent: "flex-end", width: "520px" }}>
+          <DialogActions
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center", 
+                padding: "15px",
+              }}
+            >
+              <Button
+                onClick={() => {
+                  togglePopup();
+                }}
+                variant="outlined"
+                sx={{
+                  borderColor: "#C3C6CE",
+                  color: "#3C5099",
+                  backgroundColor: "#FFFFFF",
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  fontWeight: "bold",
+                  padding: "6px 16px",
+                  fontSize: "14px",
+                  "&:hover": {
+                    backgroundColor: "#F0F4FF",
+                    borderColor: "#3C5099",
+                  },
+                  "&:active": {
+                    backgroundColor: "#E0E8FF",
+                    borderColor: "#2A3D7F",
+                  },
+                  "&:focus-visible": {
+                    outline: "2px solid #87A4FF",
+                    outlineOffset: "2px",
+                  },
+                }}
+              >
+                Отменить
+              </Button>
+
+              <Button
+                onClick={handleAdd}
+                variant="contained"
+                sx={{
+                  backgroundColor: "#3C5099",
+                  color: "#FFFFFF",
+                  textTransform: "none",
+                  borderRadius: "6px",
+                  fontWeight: "bold",
+                  padding: "6px 16px",
+                  fontSize: "14px",
+                  marginLeft: "8px",
+                  "&:hover": {
+                    backgroundColor: "#B71C1C",
+                  },
+                  "&:active": {
+                    backgroundColor: "#9A1B1B",
+                  },
+                }}
+              >
+                Добавить
+              </Button>
+            </DialogActions>
+          </Grid>
+        </Grid>
+      </DialogContent>
+    </Dialog>
+
+    {/* not purchased */}
+    <Typography
+      variant="h6"
+      sx={{
+        marginTop: "20px",
+        marginLeft: "10px",
+        fontWeight: "bold",
+        color: "#0046a1",
+      }}
+    >
+      В списке
+    </Typography>
+
+    <List
+      sx={{
+        width: "100%",
+        maxWidth: "600px",
+        wordBreak: "break-word",
+        borderRadius: "8px",
+        backgroundColor: "#ffffff",
+        padding: "10px",
+      }}
+    >
+      {inListItems.length > 0 ? (
+        inListItems.map((item) => (
+          <ListItemButton
+            key={item.name}
+            onClick={() => {
+              setSelectedItem(item);
+              setIsPricePopupOpen(true);
+            }}
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <Typography
+                  variant="body1"
+                  sx={{
+                    width: "70%",
+                    fontWeight: "500",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {capitalizeFirstLetter(item.name)}
+                </Typography>
+
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {item.amount} {item.indices}
+                </Typography>
+              </ListItemButton>
+
+            ))
+      ) : (
+        <Typography align="center" color="textSecondary" variant="body1">
+          Нет товаров в списке
+        </Typography>
+      )}
+    </List>
+
+    {/* purchased items */}
+
+    <Grid container justifyContent="space-between" alignItems="center">
       <Typography
         variant="h6"
+        align="left"
         sx={{
-          marginTop: "20px",
+          marginTop: "30px",
           marginLeft: "10px",
           fontWeight: "bold",
           color: "#0046a1",
         }}
       >
-        В списке
+        Куплено
       </Typography>
-
-      <List
+      <Typography
+        variant="body1"
+        color="textSecondary"
         sx={{
-          width: "100%",
-          maxWidth: "600px",
-          wordBreak: "break-word",
-          borderRadius: "8px",
-          backgroundColor: "#f7f9fc",
-          padding: "10px",
+          marginTop: "30px",
+          marginLeft: "10px",
+          fontWeight: "bold",
+          color: "#0046a1",
         }}
       >
-        {inListItems.length > 0 ? (
-          inListItems.map((item) => (
-            <ListItemButton
-              key={item.name}
-              onClick={() => {
-                setSelectedItem(item);
-                setIsPricePopupOpen(true);
-              }}
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
-              <Typography
+        Общая сумма: ₽{shoppingList?.total?.toFixed(2) || "0.00"}
+      </Typography>
+    </Grid>
+
+    <List
+      sx={{
+        width: "100%",
+        maxWidth: "600px",
+        wordBreak: "break-word",
+        borderRadius: "8px",
+        backgroundColor: "#ffffff",
+        padding: "10px",
+      }}
+    >
+      {purchasedItems.length > 0 ? (
+        purchasedItems.map((item) => (
+          <ListItem
+            key={item.name}
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box
+                sx={{
+                  width: "70%",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                >
+                  <Typography
                     variant="body1"
                     sx={{
-                      width: "70%",
-                      fontWeight: "500",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -489,248 +734,251 @@ const ListItems: React.FC = () => {
                   >
                     {capitalizeFirstLetter(item.name)}
                   </Typography>
-
                   <Typography
                     variant="body2"
                     color="textSecondary"
-                    sx={{
-                      whiteSpace: "nowrap",
-                    }}
                   >
-                    {item.amount} {item.indices}
+                    {`Сумма: ₽${(item.pricePerUnit! * parseFloat(item.amount)).toFixed(2)}`}
                   </Typography>
-                </ListItemButton>
+                </Box>
 
-              ))
-        ) : (
-          <Typography align="center" color="textSecondary" variant="body1">
-            Нет товаров в списке
-          </Typography>
-        )}
-      </List>
-
-      {/* Purchased Items */}
-
-      <Grid container justifyContent="space-between" alignItems="center">
-        <Typography
-          variant="h6"
-          align="left"
-          sx={{
-            marginTop: "30px",
-            marginLeft: "10px",
-            fontWeight: "bold",
-            color: "#0046a1",
-          }}
-        >
-          Куплено
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  {item.amount} {item.indices}
+                </Typography>
+              </ListItem>
+            ))
+      ) : (
+        <Typography align="center" color="textSecondary" variant="body1">
+          Нет купленных товаров
         </Typography>
-        <Typography
-          variant="body1"
-          color="textSecondary"
-          sx={{
-            marginTop: "30px",
-            marginLeft: "10px",
-            fontWeight: "bold",
-            color: "#0046a1",
-          }}
-        >
-          Общая сумма: ₽{shoppingList?.total?.toFixed(2) || "0.00"}
-        </Typography>
-      </Grid>
-
-      <List
-        sx={{
-          width: "100%",
-          maxWidth: "600px",
-          wordBreak: "break-word",
-          borderRadius: "8px",
-          backgroundColor: "#f7f9fc",
-          padding: "10px",
-        }}
-      >
-        {purchasedItems.length > 0 ? (
-          purchasedItems.map((item) => (
-            <ListItem
-              key={item.name}
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Box
-                  sx={{
-                    width: "70%",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                  >
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {capitalizeFirstLetter(item.name)}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                    >
-                      {`Сумма: ₽${(item.pricePerUnit! * parseFloat(item.amount)).toFixed(2)}`}
-                    </Typography>
-                  </Box>
-
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{ whiteSpace: "nowrap" }}
-                  >
-                    {item.amount} {item.indices}
-                  </Typography>
-                </ListItem>
-              ))
-        ) : (
-          <Typography align="center" color="textSecondary" variant="body1">
-            Нет купленных товаров
-          </Typography>
-        )}
-      </List>
+      )}
+    </List>
 
       {/* add item button */}
-      <Grid container justifyContent="center" sx={{ marginTop: "20px" }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
         <Button
           variant="contained"
-          color="primary"
           onClick={togglePopup}
           sx={{
-            width: "60px",
-            height: "60px",
-            borderRadius: "50%",
-          }}
-        >
-          <AddIcon />
-        </Button>
-      </Grid>
-
-       {/* popup for adding the price of a product */}
-       <Dialog
-          open={isPricePopupOpen}
-          onClose={() => {
-            setIsPricePopupOpen(false);
-            setSelectedItem(null);
-          }}
-          fullWidth
-          maxWidth="xs"
-          sx={{
-            "& .MuiDialog-paper": {
-              width: "90%",
-              maxWidth: "400px",
+            backgroundColor: "#3C5099",
+            color: "#FFFFFF",
+            textTransform: "none",
+            fontWeight: "bold",
+            borderRadius: "6px",
+            padding: "6px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            "&:hover": {
+              backgroundColor: "#2F3E77",
+            },
+            "&:active": {
+              backgroundColor: "#1E2A5E",
             },
           }}
         >
+          <AddIcon sx={{ fontSize: "20px" }} /> Добавить
+        </Button>
+      </Box>
 
-          <DialogTitle>
-            <Typography align="center" variant="h6" component="h2" sx={{ fontWeight: 600, color: "#0046A1" }}>
-              Укажите цену
-            </Typography>
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              fullWidth
-              variant="outlined"
-              type="text"
-              value={price}
-              onChange={(e) => {
-                const value = e.target.value;
-                // this ensures that we only have only numbers
-                // 1 decimal point, and only 2 numbers after the d.p.
-                if (value === "" || /^\d+(\.\d{0,2})?$/.test(value)) {
-                  setPrice(value);
-                }
-              }}
-              label="Цена за штуку"
-              placeholder="Введите цену"
-              className="popup-input"
-              sx={{
-                backgroundColor: "#FAFAFA",
-                borderRadius: "8px",
-                padding: "10px",
-                marginTop: "10px",
-              }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "5px",
-                width: "100%",
-              }}
-            >
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => {
-                if (selectedItem && price.trim()) {
-                  const totalSpent = parseFloat(price) * parseFloat(selectedItem.amount);
+       {/* popup for adding the price of a product */}
+       <Dialog
+        open={isPricePopupOpen}
+        onClose={() => {
+          setIsPricePopupOpen(false);
+          setSelectedItem(null);
+          setPrice("");
+          setPriceError(false);
+        }}
+        fullWidth
+        maxWidth="xs"
+        sx={{
+          "& .MuiDialog-paper": {
+            width: "90%",
+            maxWidth: "400px",
+            borderRadius: "8px",
+            backgroundColor: "#FFFFFF",
+            padding: "20px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: "18px",
+            fontWeight: "bold",
+            padding: "12px 20px",
+          }}
+        >
+          Укажите цену
+          <IconButton
+            onClick={() => {
+              setIsPricePopupOpen(false);
+              setSelectedItem(null);
+              setPrice("");
+              setPriceError(false); 
+            }}
+            sx={{
+              color: "#A6A6A6",
+              "&:hover": { color: "#3C3C3C" },
+            }}
+          >
+            <ClearIcon />
+          </IconButton>
+        </DialogTitle>
 
-                  // update the item price in the list 
-                  dispatch(
-                    updateItemInList({
-                      key: key!,
-                      item: {
-                        ...selectedItem,
-                        pricePerUnit: parseFloat(price),
-                      },
-                    })
-                  );
-                  
-                  // update the list total
-                  const x = (shoppingList?.total ?? 0) + totalSpent;
-                  dispatch(
-                    updateListTotal({
-                      listKey: key!,
-                      newTotal: x,
-                    })
-                  );
+        <DialogContent sx={{ padding: "8px 20px" }}>
+          <Autocomplete
+            freeSolo
+            options={[]}
+            inputValue={price}
+            onInputChange={(_, newValue) => {
+              if (newValue === "" || /^\d+(\.\d{0,2})?$/.test(newValue)) {
+                setPrice(newValue);
+                setPriceError(false);
+              }
+            }}
+            disableClearable={true}
+            renderInput={(params) => (
+              <StyledTextField
+                {...params}
+                label="Цена за штуку"
+                variant="filled"
+                placeholder="Введите цену"
+                error={priceError}
+                helperText={priceError ? "Введите цену за штуку" : ""}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: price ? (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setPrice("")}
+                        edge="end"
+                        aria-label="clear input"
+                        sx={{ padding: 0, marginRight: "4px" }}
+                      >
+                        <ClearIcon sx={{ color: "#A6B2C3", fontSize: 18 }} />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null,
+                }}
+              />
+            )}
+          />
+        </DialogContent>
 
-                  // add the purchased item to the history
-                  dispatch(
-                    addToHistory({
-                      listKey: key!,
-                      item: selectedItem,
-                      totalPrice: totalSpent,
+        <DialogActions
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            padding: "12px 20px",
+          }}
+        >
+          <Button
+            onClick={() => {
+              setIsPricePopupOpen(false);
+              setSelectedItem(null);
+              setPrice("");
+              setPriceError(false);
+            }}
+            variant="outlined"
+            sx={{
+              borderColor: "#C3C6CE",
+              color: "#3C5099",
+              backgroundColor: "#FFFFFF",
+              textTransform: "none",
+              borderRadius: "6px",
+              fontWeight: "bold",
+              padding: "6px 16px",
+              fontSize: "14px",
+              "&:hover": {
+                backgroundColor: "#F0F4FF",
+                borderColor: "#3C5099",
+              },
+              "&:active": {
+                backgroundColor: "#E0E8FF",
+                borderColor: "#2A3D7F",
+              },
+              "&:focus-visible": {
+                outline: "2px solid #87A4FF",
+                outlineOffset: "2px",
+              },
+            }}
+          >
+            Отменить
+          </Button>
+
+          <Button
+            onClick={() => {
+              if (!price.trim()) {
+                setPriceError(true);
+                return;
+              }
+
+              if (selectedItem) {
+                const totalSpent = parseFloat(price) * parseFloat(selectedItem.amount);
+
+                dispatch(
+                  updateItemInList({
+                    key: key!,
+                    item: {
+                      ...selectedItem,
                       pricePerUnit: parseFloat(price),
-                    })
-                  );
+                    },
+                  })
+                );
 
-                  setPrice("");
-                  setIsPricePopupOpen(false);
-                }
-              }}
-            >
-              Добавить
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => {
-                setIsPricePopupOpen(false);
-                setSelectedItem(null);
+                const newTotal = (shoppingList?.total ?? 0) + totalSpent;
+                dispatch(
+                  updateListTotal({
+                    listKey: key!,
+                    newTotal: newTotal,
+                  })
+                );
+
+                dispatch(
+                  addToHistory({
+                    listKey: key!,
+                    item: selectedItem,
+                    totalPrice: totalSpent,
+                    pricePerUnit: parseFloat(price),
+                  })
+                );
+
                 setPrice("");
-              }}
-            >
-              Отменить
-            </Button>
-            </Box>
-          </DialogActions>
-        </Dialog>
-
+                setIsPricePopupOpen(false);
+                setPriceError(false);
+              }
+            }}
+            variant="contained"
+            sx={{
+              backgroundColor: "#3C5099",
+              color: "#FFFFFF",
+              textTransform: "none",
+              borderRadius: "6px",
+              fontWeight: "bold",
+              padding: "6px 16px",
+              fontSize: "14px",
+              marginLeft: "8px",
+              "&:hover": {
+                backgroundColor: "#B71C1C",
+              },
+              "&:active": {
+                backgroundColor: "#9A1B1B",
+              },
+            }}
+          >
+            Добавить
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   </div>
 );
