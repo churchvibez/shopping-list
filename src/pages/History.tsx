@@ -45,13 +45,13 @@ const History: React.FC = () => {
         startIcon={<ArrowBackIcon />}
         sx={{
           backgroundColor: "transparent",
+          right: "60px",
           color: "#3057D5",
           textTransform: "none",
           "&:hover": { textDecoration: "underline" },
         }}
         onClick={() => window.history.back()}
       >
-        Назад
       </Button>
 
       <Grid container direction="column" alignItems="center" sx={{ marginTop: "1%", padding: "0 10px" }}>

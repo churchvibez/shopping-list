@@ -135,6 +135,7 @@ const ShoppingLists: React.FC = () => {
               padding: "8px 25px",
               boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
               border: "1px solid #E0E3E7",
+              color: "#000000",
               backgroundColor: "#FFFFFF",
               transition: "all 0.2s ease-in-out",
               borderRadius: "0px",

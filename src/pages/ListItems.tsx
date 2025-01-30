@@ -302,14 +302,13 @@ const ListItems: React.FC = () => {
         }}
         onClick={() => navigate("/lists")}
       >
-        Назад
       </Button>
 
       <Typography
         variant="h5"
         sx={{
           fontWeight: "bold",
-          color: "#0046a1",
+          color: "#000000",
           textAlign: "left",
           marginLeft: "10px", 
           flexGrow: 1,
@@ -609,7 +608,7 @@ const ListItems: React.FC = () => {
         marginTop: "20px",
         marginLeft: "10px",
         fontWeight: "bold",
-        color: "#0046a1",
+        color: "#000000",
       }}
     >
       В списке
@@ -682,7 +681,7 @@ const ListItems: React.FC = () => {
           marginTop: "30px",
           marginLeft: "10px",
           fontWeight: "bold",
-          color: "#0046a1",
+          color: "#000000",
         }}
       >
         Куплено
@@ -694,7 +693,7 @@ const ListItems: React.FC = () => {
           marginTop: "30px",
           marginLeft: "10px",
           fontWeight: "bold",
-          color: "#0046a1",
+          color: "#000000",
         }}
       >
         Общая сумма: ₽{shoppingList?.total?.toFixed(2) || "0.00"}
