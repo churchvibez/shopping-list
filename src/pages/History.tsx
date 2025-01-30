@@ -77,17 +77,46 @@ const History: React.FC = () => {
                 }
               }}
             >
-              <AccordionSummary 
-                expandIcon={<ExpandMoreIcon />} 
-                sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  minHeight: "56px",
+                  "&.Mui-expanded": {
+                    minHeight: "56px", 
+                  },
+                  "& .MuiAccordionSummary-content": {
+                    margin: "0 !important",
+                  },
+                  padding: "0 16px", 
+                }}
               >
-                <Typography sx={{ fontWeight: "600", fontSize: "1rem", color: "#0B1F33" }}>
+                <Typography
+                  sx={{
+                    fontWeight: "600",
+                    fontSize: "1rem",
+                    color: "#0B1F33",
+                    lineHeight: "1.5",
+                    flexGrow: 1,
+                  }}
+                >
                   {history.listName}
                 </Typography>
-                <Typography color="textSecondary" sx={{ marginLeft: "auto", fontWeight: "500" }}>
+                <Typography
+                  color="textSecondary"
+                  sx={{
+                    fontWeight: "500",
+                    lineHeight: "1.5",
+                    whiteSpace: "nowrap", 
+                  }}
+                >
                   Общая сумма: ₽{history.total.toFixed(2)}
                 </Typography>
               </AccordionSummary>
+
               <AccordionDetails>
                 <List>
                   {history.purchases.map((item, idx) => (
