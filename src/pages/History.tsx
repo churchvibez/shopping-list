@@ -134,11 +134,21 @@ const History: React.FC = () => {
           </Box>
         )}
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%", maxWidth: "600px", marginTop: "20px" }}>
+        <Box 
+          sx={{ 
+            position: "relative",
+            width: "100%", 
+            maxWidth: "900px", 
+            minHeight: "80px",
+          }}
+        >
           <Button
             variant="outlined"
             onClick={handleOpenConfirm}
             sx={{
+              position: "absolute",
+              bottom: 0, 
+              right: 0,
               borderColor: "#D32F2F",
               color: "#D32F2F",
               textTransform: "none",

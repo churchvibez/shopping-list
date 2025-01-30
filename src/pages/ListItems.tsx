@@ -169,20 +169,25 @@ const StyledTextField = styled((props: TextFieldProps) => (
     },
     "&.Mui-focused": {
       borderColor: "#3C5099",
-      boxShadow: `${alpha("#3C5099", 0.25)} 0 0 0 2px`, 
+      boxShadow: `${alpha("#3C5099", 0.25)} 0 0 0 2px`,
       "&:before, &:after": {
         display: "none !important",
       },
     },
+    "&.Mui-error": {
+      borderColor: "#D32F2F",
+    },
   },
+
   "& .MuiInputLabel-root": {
-    color: "#A6B2C3",
+    color: "#A6B2C3", 
     transform: "translate(14px, 14px)",
     transition: "transform 0.2s ease-in-out",
   },
   "& .MuiInputLabel-shrink": {
     transform: "translate(14px, 6px)",
     fontSize: "14px",
+    color: "#A6B2C3 !important",
   },
 }));
 
